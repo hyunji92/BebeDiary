@@ -18,12 +18,19 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
-
-        <ImageView
+        <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/logo_mint"
-        />
+                android:orientation="horizontal"
+                android:layout_gravity="center|center_horizontal">
+
+            <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/logo_mint"
+            />
+        </LinearLayout>
+
 
     </android.support.v7.widget.Toolbar>
 
