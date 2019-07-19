@@ -25,6 +25,7 @@
                       android:layout_marginRight="28dp"
                       android:layout_marginTop="21dp">
 
+            //나가기
             <ImageButton
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -34,7 +35,7 @@
             <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margintop="8dp"
+                    android:layout_marginTop="10dp"
                     android:layout_marginBottom="8dp"
                     android:layout_marginLeft="65dp"
                     android:layout_marginRight="65dp"
@@ -42,23 +43,15 @@
                     android:textSize="20sp"
                     android:textColor="#000000"
             />
+            //등록
             <ImageButton
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="8dp"
                     android:background="@drawable/add_button"/>
-
-            <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-                <ImageView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                />
-
-            </LinearLayout>
-
         </LinearLayout>
 
+        //임신중체크/사진 empty등록
         <FrameLayout
                 android:id="@+id/register_picture"
                 android:layout_width="wrap_content"
@@ -133,6 +126,8 @@
 
                 </LinearLayout>
             </LinearLayout>
+
+            //이름
             <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -171,6 +166,7 @@
             </LinearLayout>
         </FrameLayout>
 
+        //등록한 사진
         <FrameLayout android:layout_width="wrap_content"
                      android:layout_height="wrap_content"
                      android:layout_marginTop="15dp"
@@ -193,6 +189,7 @@
                        android:background="@drawable/test"/>
         </FrameLayout>
 
+        //생일
         <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -238,6 +235,43 @@
 
             </FrameLayout>
         </LinearLayout>
+
+        //성별
+        <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_gravity="bottom"
+                android:layout_marginTop="8dp"
+                android:layout_marginLeft="58dp">
+
+            <TextView android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:text="성별"
+                      android:textSize="18sp"
+                      android:layout_gravity="center"
+                      android:layout_marginRight="5dp"
+                      android:textColor="#000000"/>
+
+            <LinearLayout android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:orientation="vertical">
+                <android.support.design.widget.TextInputEditText
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="16sp"
+                        android:maxLength="6"
+                        android:layout_gravity="center"
+                        android:textColor="@color/registerPopupTextColor"
+                        tools:text="여"/>
+                <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/gender_popup_line"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        //일정알림
 
     </LinearLayout>
 
