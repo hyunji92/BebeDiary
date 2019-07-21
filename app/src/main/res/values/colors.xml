@@ -7,5 +7,8 @@
     <color name="mainColor">#6FC4C7</color>
     <color name="greyBackground">#EEEFEF</color>
     <color name="registerPopupTextColor">#595757</color>
+    <color name="greyTextColor">#888889</color>
+    <color name="greyMainTextColor">#BDBEBF</color>
+    <color name="greyMainLineColor">#DCDCDD</color>
 
 </resources>

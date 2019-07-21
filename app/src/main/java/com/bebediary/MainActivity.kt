@@ -1,10 +1,11 @@
 package com.bebediary
 
+import android.content.Intent
 import android.os.Bundle
-import android.support.design.widget.BottomNavigationView
 import android.support.v7.app.AppCompatActivity
 import android.view.View
-import android.widget.TextView
+import com.bebediary.memo.MemoActivity
+import com.bebediary.register.BabyRegisterActivity
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
@@ -13,11 +14,33 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        //등록한 아기가 업다면
-        add_baby.apply {
-            visibility = View.VISIBLE
-            setOnClickListener {
 
+        //등록한 아기가 업다면
+        main_top_layout.visibility= View.GONE
+        comming_schedule_layout.visibility = View.GONE
+        main_image_off_button.visibility = View.GONE
+        first_add_baby_layout.visibility = View.VISIBLE
+        add_baby.apply {
+            setOnClickListener {
+                val intent = Intent(this@MainActivity, BabyRegisterActivity::class.java)
+                //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK and Intent.FLAG_ACTIVITY_CLEAR_TASK and Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                startActivity(intent)
+            }
+        }
+        //MemoActiviy
+
+        memo_icon.apply {
+            setOnClickListener {
+                val intent = Intent(this@MainActivity, MemoActivity::class.java)
+                //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK and Intent.FLAG_ACTIVITY_CLEAR_TASK and Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                startActivity(intent)
+            }
+        }
+        memo_bottom_button.apply {
+            setOnClickListener {
+                val intent = Intent(this@MainActivity, MemoActivity::class.java)
+                //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK and Intent.FLAG_ACTIVITY_CLEAR_TASK and Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                startActivity(intent)
             }
         }
 
