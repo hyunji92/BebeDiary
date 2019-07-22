@@ -15,6 +15,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 
+
 class BabyRegisterActivity : Activity() {
 
     val dateSetListener = DatePickerDialog.OnDateSetListener { view, year, monthOfYear, dayOfMonth ->
@@ -67,6 +68,15 @@ class BabyRegisterActivity : Activity() {
         register_baby.setOnClickListener {
             saveBabyInfo()
         }
+        //사진 등록 ( 카메라, 갤러리 )
+        //https://black-jin0427.tistory.com/120
+        //등록한 사진 저장
+        //https://m.blog.naver.com/PostView.nhn?blogId=kkh32490&logNo=220287551618&proxyReferer=https%3A%2F%2Fwww.google.com%2F
+        //http://www.masterqna.com/android/16166/%EC%84%A0%ED%83%9D%EB%90%9C-bipmap%EC%9D%84sharedpreferences%EC%97%90-%EC%A0%80%EC%9E%A5%ED%95%98%EB%8A%94%EB%B2%95-%E3%85%9C%E3%85%9C
+        //http://android-steps.blogspot.com/2015/08/profile-page-save-image-data-in.html
+        //이걸로 하면 될듯 : https://github.com/martinsing/Image-Save-And-Retrieve-App
+
+
     }
 
     // 이름, 성별, 몇일
@@ -79,7 +89,14 @@ class BabyRegisterActivity : Activity() {
         }
         Log.d("test" ,"EditText nane : " + baby_name.text.toString())
 
+        if(baby_gender.text.toString() != "" || baby_gender.text.toString() != null) {
+            editor.apply {
+                putString("baby_gender", baby_gender.text.toString())
+                apply()
+            }
+        }
 
+        //알람 몇일 전 ? 저장 ( 라이디오 버튼 값 )
 
     }
 

@@ -27,8 +27,8 @@ class MainActivity : AppCompatActivity() {
                 startActivity(intent)
             }
         }
-        //MemoActiviy
 
+        //MemoActiviy
         memo_icon.apply {
             setOnClickListener {
                 val intent = Intent(this@MainActivity, MemoActivity::class.java)
@@ -47,8 +47,15 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-
+/*
+중요 사이트
+https://promobile.tistory.com/193
+https://dpdpwl.tistory.com/3
+https://github.com/dolsanta/Sample_Calendar
+https://dpdpwl.tistory.com/3
+* */
     /*참고 사이트
+
     * https://webnautes.tistory.com/1216
 
 https://medium.com/@Patel_Prashant_/android-custom-calendar-with-events-fa48dfca8257
