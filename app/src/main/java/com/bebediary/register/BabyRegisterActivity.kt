@@ -109,6 +109,10 @@ class BabyRegisterActivity : Activity() {
             //else Toast.makeText(it.getContext(), getResources().getString(R.string.permission_2), Toast.LENGTH_LONG).show();
             showDialog()
         }
+        //https://black-jin0427.tistory.com/121
+        //https://g-y-e-o-m.tistory.com/48
+        //http://dailyddubby.blogspot.com/2018/04/107-tedpermission.html
+
         // url 이미지 폴더에 저장하고 이미지 열기
         // https://heum-story.tistory.com/13
 
