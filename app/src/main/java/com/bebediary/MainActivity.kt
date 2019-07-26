@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         //MemoActiviy
-        memo_icon.apply {
+        /*memo_icon.apply {
             setOnClickListener {
                 val intent = Intent(this@MainActivity, MemoActivity::class.java)
                 //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK and Intent.FLAG_ACTIVITY_CLEAR_TASK and Intent.FLAG_ACTIVITY_CLEAR_TOP)
@@ -42,7 +42,9 @@ class MainActivity : AppCompatActivity() {
                 //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK and Intent.FLAG_ACTIVITY_CLEAR_TASK and Intent.FLAG_ACTIVITY_CLEAR_TOP)
                 startActivity(intent)
             }
-        }
+        }*/
+
+        //CalendarActivity
 
     }
 
