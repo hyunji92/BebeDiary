@@ -46,6 +46,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="8dp"
+                    android:clickable="true"
                     android:layout_centerVertical="true"
                     android:layout_alignParentRight="true"
                     android:background="@drawable/add_button"/>
@@ -151,6 +152,7 @@
                             android:layout_height="wrap_content"
                             android:textSize="16sp"
                             android:maxLength="6"
+                            android:maxLines="1"
                             android:layout_gravity="center"
                             android:hint="이름 입력"
                             android:inputType="text"
@@ -158,11 +160,6 @@
                             android:enabled="true"
                             android:textColor="@color/registerPopupTextColor"
                     />
-                    <ImageView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="bottom"
-                            android:background="@drawable/popup_line"/>
 
                 </LinearLayout>
             </LinearLayout>
@@ -178,9 +175,9 @@
                         android:id="@+id/birthday_text"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="출산 예정일"
+                        android:text="생일"
                         android:textSize="18sp"
-                        tools:text="생일"
+                        tools:text="출산 예정일"
                         android:layout_gravity="center|center_horizontal"
                         android:layout_marginRight="5dp"
                         android:textColor="#000000"/>
@@ -205,8 +202,8 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="bottom"
-                            tools:background="@drawable/popup_line"
-                            android:background="@drawable/gender_popup_line"/>
+                            tools:background="@drawable/gender_popup_line"
+                            android:background="@drawable/popup_line"/>
 
                     <ImageView
                             android:id="@+id/date_picker_button"
@@ -256,14 +253,12 @@
                             android:layout_height="wrap_content"
                             android:textSize="16sp"
                             android:maxLength="2"
+                            android:maxLines="1"
                             android:layout_gravity="center"
                             android:hint="성별 입력"
                             android:textColorHint="#efefef"
                             android:textColor="@color/registerPopupTextColor"/>
-                    <ImageView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/gender_popup_line"/>
+
                 </LinearLayout>
             </LinearLayout>
 

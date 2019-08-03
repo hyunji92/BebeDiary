@@ -1,53 +1,170 @@
 package com.bebediary
 
+import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
+import android.net.Uri
 import android.os.Bundle
+import android.support.design.widget.BottomNavigationView
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.view.View
-import com.bebediary.memo.MemoActivity
+import com.bebediary.calendar.CalendarFragment
+import com.bebediary.memo.NoteListActivity
 import com.bebediary.register.BabyRegisterActivity
+import com.hyundeee.app.usersearch.YameTest
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
+    lateinit var prefs: SharedPreferences
+    lateinit var editor: SharedPreferences.Editor
 
+    private val fragmentManager = supportFragmentManager
+
+    private val calendarFragment = CalendarFragment()
+
+    private val onNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
+        val transaction = fragmentManager.beginTransaction()
+        when (item.itemId) {
+            R.id.navigation_camera -> {
+                Log.d("test", "test camera")
+                return@OnNavigationItemSelectedListener true
+            }
+            R.id.navigation_calendar -> {
+                Log.d("test", "test calendar")
+                main_all_Scrollview.visibility = View.GONE
+                frame_layout.visibility = View.VISIBLE
+                transaction.replace(R.id.frame_layout, calendarFragment).commitAllowingStateLoss();
+                return@OnNavigationItemSelectedListener true
+            }
+            R.id.navigation_checklist -> {
+                Log.d("test", "test checklist")
+                return@OnNavigationItemSelectedListener true
+            }
+            R.id.navigation_information -> {
+                Log.d("test", "test information")
+                return@OnNavigationItemSelectedListener true
+            }
+            R.id.navigation_memo -> {
+                Log.d("test", "test memo")
+                val intent = Intent(this@MainActivity, NoteListActivity::class.java)
+                //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK and Intent.FLAG_ACTIVITY_CLEAR_TASK and Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                startActivity(intent)
+
+                return@OnNavigationItemSelectedListener true
+            }
+        }
+        false
+    }
+
+    lateinit var testImage: String
+
+    @SuppressLint("CheckResult")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-
-        //등록한 아기가 업다면
-        main_top_layout.visibility= View.GONE
-        comming_schedule_layout.visibility = View.GONE
-        main_image_off_button.visibility = View.GONE
-        first_add_baby_layout.visibility = View.VISIBLE
-        add_baby.apply {
-            setOnClickListener {
-                val intent = Intent(this@MainActivity, BabyRegisterActivity::class.java)
-                //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK and Intent.FLAG_ACTIVITY_CLEAR_TASK and Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                startActivity(intent)
-            }
+        val navView: BottomNavigationView = findViewById(R.id.nav_view)
+        navView.apply {
+            isItemHorizontalTranslationEnabled = false
+            setOnNavigationItemSelectedListener(onNavigationItemSelectedListener)
         }
 
-        //MemoActiviy
-        /*memo_icon.apply {
-            setOnClickListener {
-                val intent = Intent(this@MainActivity, MemoActivity::class.java)
-                //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK and Intent.FLAG_ACTIVITY_CLEAR_TASK and Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                startActivity(intent)
+        prefs = getSharedPreferences("baby_info", Context.MODE_PRIVATE)
+        editor = prefs.edit()
+
+        babyInfoSetting()
+
+        // 아기 등록 후 메인 화면에도 나와야함
+        YameTest.testSubject.subscribe {
+            Log.d("onNext", "onDataLoaded ------ :::$it")
+            if (it == null) {
+                no_register_baby_image_layout.visibility = View.VISIBLE
+                first_add_baby_layout.visibility = View.GONE
+                main_image_off_button.visibility = View.VISIBLE
+            } else {
+                first_add_baby_layout.visibility = View.GONE
+                main_image_off_button.visibility = View.VISIBLE
+                // 사진 등록 , 사진 Uri 있음
+                real_baby_image.visibility = View.VISIBLE
+                real_baby_image.setImageURI(it)
+
+                main_top_layout.visibility = View.VISIBLE
+                comming_schedule_layout.visibility = View.VISIBLE
+
+                var imageOn = false
+                main_image_off_button.setOnClickListener {
+                    if (imageOn) {
+                        Log.d("test", "test Image On$imageOn")
+                        main_image_off_button.setBackgroundResource(R.drawable.main_image_off)
+                        no_register_baby_image_layout.visibility = View.GONE
+                        real_baby_image.visibility = View.GONE
+                        imageOn = false
+                    } else {
+                        Log.d("test", "test Image Off$imageOn")
+                        main_image_off_button.setBackgroundResource(R.drawable.main_image_on)
+                        no_register_baby_image_layout.visibility = View.VISIBLE
+                        real_baby_image.visibility = View.VISIBLE
+                        imageOn = true
+                    }
+                }
             }
         }
-        memo_bottom_button.apply {
-            setOnClickListener {
-                val intent = Intent(this@MainActivity, MemoActivity::class.java)
-                //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK and Intent.FLAG_ACTIVITY_CLEAR_TASK and Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                startActivity(intent)
-            }
-        }*/
-
-        //CalendarActivity
-
     }
 
+
+    fun babyInfoSetting() {
+        var name = prefs.getString("baby_name", "")
+        if (name == "" || name == null) {
+            // 아무 정보 없을 때
+            first_add_baby_layout.visibility = View.VISIBLE
+            main_image_off_button.visibility = View.GONE
+
+            add_baby.apply {
+                setOnClickListener {
+                    val intent = Intent(this@MainActivity, BabyRegisterActivity::class.java)
+                    //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK and Intent.FLAG_ACTIVITY_CLEAR_TASK and Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    startActivity(intent)
+                }
+            }
+        } else {
+            // 아기 정보 생겼을 때
+            haveBabyInfoLayoutSet()
+        }
+    }
+
+    fun haveBabyInfoLayoutSet() {
+        first_add_baby_layout.visibility = View.GONE
+        main_image_off_button.visibility = View.VISIBLE
+        // 사진 등록 , 사진 Uri 있음
+        var profile = prefs.getString("image", null)
+        if (profile == null) {
+            no_register_baby_image_layout.visibility = View.VISIBLE
+        } else {
+            real_baby_image.visibility = View.VISIBLE
+            real_baby_image.setImageURI(Uri.parse(profile))
+        }
+        main_top_layout.visibility = View.VISIBLE
+        comming_schedule_layout.visibility = View.VISIBLE
+
+        var imageOn = false
+        main_image_off_button.setOnClickListener {
+            if (imageOn) {
+                Log.d("test", "test Image On$imageOn")
+                main_image_off_button.setBackgroundResource(R.drawable.main_image_off)
+                no_register_baby_image_layout.visibility = View.GONE
+                real_baby_image.visibility = View.GONE
+                imageOn = false
+            } else {
+                Log.d("test", "test Image Off$imageOn")
+                main_image_off_button.setBackgroundResource(R.drawable.main_image_on)
+                no_register_baby_image_layout.visibility = View.VISIBLE
+                real_baby_image.visibility = View.VISIBLE
+                imageOn = true
+            }
+        }
+    }
 
 /*
 중요 사이트

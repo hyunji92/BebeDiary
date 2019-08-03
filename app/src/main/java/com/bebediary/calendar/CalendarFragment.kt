@@ -1,38 +1,42 @@
 package com.bebediary.calendar
 
+import android.content.Intent
 import android.database.Cursor
-import android.graphics.Color
 import android.os.AsyncTask
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
+import android.support.v4.app.Fragment
 import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
 import com.bebediary.R
 import com.bebediary.calendar.decorators.EventDecorator
 import com.bebediary.calendar.decorators.OneDayDecorator
 import com.bebediary.calendar.decorators.SaturdayDecorator
 import com.bebediary.calendar.decorators.SundayDecorator
+import com.bebediary.register.BabyRegisterActivity
 import com.prolificinteractive.materialcalendarview.CalendarDay
 import com.prolificinteractive.materialcalendarview.CalendarMode
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView
+import com.prolificinteractive.materialcalendarview.OnDateSelectedListener
 import java.util.*
 import java.util.concurrent.Executors
 
-class CalendarActivity : AppCompatActivity() {
+class CalendarFragment : Fragment() {
 
     /*internal var time: String? = null
     internal var kcal: String? = null
     internal var menu: String? = null*/
 
-    private val oneDayDecorator = OneDayDecorator()
+    private val oneDayDecorator = OneDayDecorator(activity)
     internal var cursor: Cursor? = null
     internal lateinit var materialCalendarView: MaterialCalendarView
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_calendar)
 
-        materialCalendarView = findViewById(R.id.calendarView) as MaterialCalendarView
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        var view = inflater.inflate(R.layout.fragment_calendar, container, false);
+        materialCalendarView = view.findViewById(R.id.calendarView) as MaterialCalendarView
 
         materialCalendarView.state().edit()
             .setFirstDayOfWeek(Calendar.SUNDAY)
@@ -42,8 +46,8 @@ class CalendarActivity : AppCompatActivity() {
             .commit()
 
         materialCalendarView.addDecorators(
-            SundayDecorator(),
-            SaturdayDecorator(),
+            SundayDecorator(activity),
+            SaturdayDecorator(activity),
             oneDayDecorator
         )
 
@@ -65,9 +69,15 @@ class CalendarActivity : AppCompatActivity() {
             Log.i("shot_Day test", shot_Day + "")
             materialCalendarView.clearSelection()
 
-            Toast.makeText(applicationContext, shot_Day, Toast.LENGTH_SHORT).show()
+            val intent = Intent(activity, AddCalendarActivity::class.java)
+            //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK and Intent.FLAG_ACTIVITY_CLEAR_TASK and Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            activity?.startActivity(intent)
+
+            Toast.makeText(activity, shot_Day, Toast.LENGTH_SHORT).show()
         }
+        return view
     }
+
 
     private inner class ApiSimulator internal constructor(internal var Time_Result: Array<String>) :
         AsyncTask<Void, Void, List<CalendarDay>>() {
@@ -104,11 +114,18 @@ class CalendarActivity : AppCompatActivity() {
         override fun onPostExecute(calendarDays: List<CalendarDay>) {
             super.onPostExecute(calendarDays)
 
-            if (isFinishing) {
+            if (activity!!.isFinishing) {
                 return
             }
 
-            materialCalendarView.addDecorator(EventDecorator(Color.GREEN, calendarDays, this@CalendarActivity))
+            materialCalendarView.addDecorator(
+                EventDecorator(
+                    activity!!.resources.getColor(R.color.calendarRed),
+                    calendarDays,
+                    activity
+                )
+            )
+            //materialCalendarView.addDecorator(EventDecorator(activity!!.resources.getString(R.string.title_home),calendarDays, activity))
         }
     }
 

@@ -11,4 +11,6 @@
     <color name="greyMainTextColor">#BDBEBF</color>
     <color name="greyMainLineColor">#DCDCDD</color>
 
+    <color name="calendarRed">#FF8484</color>
+
 </resources>

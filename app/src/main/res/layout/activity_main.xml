@@ -29,13 +29,26 @@
                     android:background="@drawable/logo_mint"/>
 
 
+
         </RelativeLayout>
 
     </android.support.v7.widget.Toolbar>
 
+    <FrameLayout
+            android:id="@+id/frame_layout"
+            android:layout_height="0dp"
+            android:layout_width="match_parent"
+            app:layout_constraintBottom_toTopOf="@+id/nav_view"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@+id/toolbar"/>
+
     <ScrollView
+            android:id="@+id/main_all_Scrollview"
             android:layout_width="match_parent"
             android:layout_height="0dp"
+            android:visibility="visible"
             app:layout_constraintBottom_toTopOf="@+id/nav_view"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -47,11 +60,11 @@
                 android:layout_height="match_parent"
                 android:orientation="vertical">
 
-            //아기를 추가해 주세요.(맨처음)
+            //아기를 추가해 주세요.(맨처음, 보이고 안보인다)
             <LinearLayout
                     android:id="@+id/first_add_baby_layout"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:visibility="gone"
                     tools:visibility="visible"
@@ -62,6 +75,8 @@
                         android:id="@+id/add_baby"
                         android:layout_width="300dp"
                         android:layout_height="250dp"
+                        android:layout_marginLeft="30dp"
+                        android:layout_gravity="center|center_horizontal"
                         android:background="@drawable/baby_empty"/>
             </LinearLayout>
 
@@ -70,13 +85,18 @@
             <FrameLayout
                     android:id="@+id/main_baby_layout"
                     android:layout_width="match_parent"
-                    android:layout_height="315dp">
+                    android:layout_height="wrap_content">
 
                 // 아가 사진 없을 때, 등록하세요
+                // 아기 사진 없이 등록했을 때 보이는거
+                // 보여야 하는거
                 <LinearLayout
+                        android:id="@+id/no_register_baby_image_layout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
+                        tools:visibility="gone"
+                        android:layout_marginTop="40dp"
                         android:visibility="gone">
 
                     <ImageButton
@@ -84,8 +104,7 @@
                             android:layout_height="wrap_content"
                             android:background="@drawable/add_baby_image"
                             android:layout_gravity="center_horizontal|center"
-                            android:gravity="center|center_horizontal"
-                    />
+                            android:gravity="center|center_horizontal"/>
 
                     <TextView
                             android:layout_width="wrap_content"
@@ -95,17 +114,18 @@
                             android:textSize="32sp"
                             android:layout_marginTop="10dp"
                             android:layout_gravity="center_horizontal|center"
-                            android:gravity="center|center_horizontal"
-                    />
+                            android:gravity="center|center_horizontal"/>
 
                 </LinearLayout>
-                // 리얼 사진
+                // 리얼 사진, 사진 있으면 보여야 하는거
+                // 보여야 하는거
                 <ImageView
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:background="@drawable/test_image"
-                        android:visibility="gone"
-                />
+                        android:id="@+id/real_baby_image"
+                        android:layout_width="wrap_content"
+                        android:layout_height="315dp"
+                        tools:background="@drawable/test_image"
+                        android:scaleType="fitXY"
+                        android:visibility="gone"/>
 
                 <ImageButton
                         android:id="@+id/main_image_off_button"
@@ -114,6 +134,7 @@
                         android:layout_gravity="right"
                         android:layout_marginTop="20dp"
                         android:layout_marginRight="15dp"
+                        android:layout_marginBottom="15dp"
                         android:background="@drawable/main_image_on"/>
 
             </FrameLayout>
@@ -122,9 +143,10 @@
             <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/main_top"
+                    android:background="@drawable/main_top_layout"
                     android:orientation="vertical"
                     tools:visibility="gone"
+                    android:visibility="gone"
                     android:id="@+id/main_top_layout">
 
                 //이름, 성별, 생년월일 레이아웃
@@ -159,6 +181,7 @@
                     android:background="#ffffff"
                     android:orientation="vertical"
                     tools:visibility="gone"
+                    android:visibility="gone"
                     android:layout_marginTop="10dp">
                 // 다가오는 일정 text layout
                 <FrameLayout
@@ -210,19 +233,19 @@
     </ScrollView>
 
     //bottom navigation
-    <com.google.android.material.bottomnavigation.BottomNavigationView
+    <android.support.design.widget.BottomNavigationView
             android:id="@+id/nav_view"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="0dp"
             android:layout_marginEnd="0dp"
-            android:focusable="false"
+            app:labelVisibilityMode="unlabeled"
+            app:itemIconTint="@color/greyTextColor"
             android:background="#ffffff"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             android:layout_alignParentBottom="true"
-            app:labelVisibilityMode="labeled"
             app:menu="@menu/bottom_nav_menu"/>
 
 

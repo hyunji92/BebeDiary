@@ -1,7 +1,9 @@
 package com.bebediary.calendar.decorators;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.support.v4.app.FragmentActivity;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
@@ -18,9 +20,11 @@ import java.util.Date;
 public class OneDayDecorator implements DayViewDecorator {
 
     private CalendarDay date;
+    private Context context;
 
-    public OneDayDecorator() {
+    public OneDayDecorator(FragmentActivity activity) {
         date = CalendarDay.today();
+        context = activity;
     }
 
     @Override
@@ -31,8 +35,8 @@ public class OneDayDecorator implements DayViewDecorator {
     @Override
     public void decorate(DayViewFacade view) {
         view.addSpan(new StyleSpan(Typeface.BOLD));
-        view.addSpan(new RelativeSizeSpan(1.4f));
-        view.addSpan(new ForegroundColorSpan(Color.BLUE));
+        view.addSpan(new RelativeSizeSpan(1.1f));
+        view.addSpan(new ForegroundColorSpan(Color.WHITE));
     }
 
     /**

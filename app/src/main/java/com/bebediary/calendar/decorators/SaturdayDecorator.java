@@ -1,7 +1,9 @@
 package com.bebediary.calendar.decorators;
 
-import android.graphics.Color;
+import android.content.Context;
+import android.support.v4.app.FragmentActivity;
 import android.text.style.ForegroundColorSpan;
+import com.bebediary.R;
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.DayViewDecorator;
 import com.prolificinteractive.materialcalendarview.DayViewFacade;
@@ -15,7 +17,9 @@ public class SaturdayDecorator implements DayViewDecorator {
 
     private final Calendar calendar = Calendar.getInstance();
 
-    public SaturdayDecorator() {
+    private Context context;
+    public SaturdayDecorator(FragmentActivity activity) {
+        context = activity;
     }
 
     @Override
@@ -27,6 +31,6 @@ public class SaturdayDecorator implements DayViewDecorator {
 
     @Override
     public void decorate(DayViewFacade view) {
-        view.addSpan(new ForegroundColorSpan(Color.BLUE));
+        view.addSpan(new ForegroundColorSpan(context.getResources().getColor(R.color.mainColor)));
     }
 }

@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
@@ -20,6 +21,7 @@ import android.widget.Toast
 import com.bebediary.R
 import com.gun0912.tedpermission.PermissionListener
 import com.gun0912.tedpermission.TedPermission
+import com.hyundeee.app.usersearch.YameTest
 import kotlinx.android.synthetic.main.activity_baby_register.*
 import java.io.File
 import java.io.IOException
@@ -39,7 +41,7 @@ class BabyRegisterActivity : Activity() {
 
     lateinit var imgUri: Uri
     lateinit var photoURI: Uri
-    lateinit var albumURI: Uri
+
 
 
     lateinit var mCurrentPhotoPath: String
@@ -84,21 +86,34 @@ class BabyRegisterActivity : Activity() {
         requestWindowFeature(Window.FEATURE_NO_TITLE)
         setContentView(R.layout.activity_baby_register)
 
-        register_exit.setOnClickListener {
-            this.finish()
-        }
-        date_picker_button.setOnClickListener { datePicker() }
+        //사진 접근 권한
+        tedPermission()
 
         prefs = getSharedPreferences("baby_info", Context.MODE_PRIVATE)
         editor = prefs.edit()
 
-        setPregnantStatus()
-
+        register_exit.setOnClickListener {
+            this.finish()
+        }
         register_baby.setOnClickListener {
             saveBabyInfo()
+            editor.apply()
+            YameTest.testSubject.onNext(imgUri)
+            this.finish()
         }
-        //사진 접근 권한
-        tedPermission()
+
+        date_picker_button.setOnClickListener { datePicker() }
+        setPregnantStatus()
+
+        val mImageUri = prefs.getString("image", null)
+        if (mImageUri != null) {
+            empty_baby_image_register.visibility = View.GONE
+            baby_image.visibility = View.VISIBLE
+            baby_image_layout.visibility = View.VISIBLE
+            baby_image.setImageURI(Uri.parse(mImageUri))
+        } else {
+            baby_image.setImageResource(R.drawable.empty_image_register)
+        }
 
         empty_baby_image_register.setOnClickListener {
             // 권한 허용에 동의하지 않았을 경우 토스트를 띄웁니다.
@@ -151,12 +166,18 @@ class BabyRegisterActivity : Activity() {
                     var albumFile: File? = null
                     albumFile = createImageFile()
                     photoURI = data.data
-                    albumURI = Uri.fromFile(albumFile)
+                    imgUri = Uri.fromFile(albumFile)
                     galleryAddPick()
                     empty_baby_image_register.visibility = View.GONE
                     baby_image.visibility = View.VISIBLE
                     baby_image_layout.visibility = View.VISIBLE
                     baby_image.setImageURI(photoURI)
+                    baby_image.invalidate()
+
+                    editor.putString("image", imgUri.toString())
+                    editor.apply()
+
+//                    YameTest.testSubject.onNext(albumURI)
 
                     //cropImage();
                 } catch (e: Exception) {
@@ -172,6 +193,12 @@ class BabyRegisterActivity : Activity() {
                 baby_image.visibility = View.VISIBLE
                 baby_image_layout.visibility = View.VISIBLE
                 baby_image.setImageURI(imgUri)
+
+                editor.putString("image", imgUri.toString())
+                editor.apply()
+
+//                YameTest.testSubject.onNext(imgUri)
+
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -193,12 +220,6 @@ class BabyRegisterActivity : Activity() {
     private fun goToAlbum() {
         //특정 경로
         //https://straight-strange.tistory.com/16
-
-        /*var targetUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-        val targetDir = Environment.getExternalStorageDirectory().toString() + "/Bebe"
-        targetUri = targetUri.buildUpon().appendQueryParameter("bucketId", (targetDir.toLowerCase().hashCode()).toString()).build()
-        val intent = Intent(Intent.ACTION_VIEW, targetUri)
-        startActivity(intent)*/
         val intent = Intent(Intent.ACTION_PICK)
         intent.type = MediaStore.Images.Media.CONTENT_TYPE
         intent.type = "image/*"
@@ -291,8 +312,19 @@ class BabyRegisterActivity : Activity() {
 
     fun setPregnantStatus() {
         var check = false
+        isPregnant = prefs.getBoolean("pregnant_status", false)
+        if (isPregnant){
+            //임신중
+            pregnant_on_off.setBackgroundResource(R.drawable.pregnant_on)
+            birthday_text.text = "출산 예정일"
+            birthday_line.setBackgroundResource(R.drawable.gender_popup_line)
+        } else {
+            //임신중 아님
+            pregnant_on_off.setBackgroundResource(R.drawable.pregnant_off)
+            birthday_text.text = "생일"
+            birthday_line.setBackgroundResource(R.drawable.popup_line)
+        }
         pregnant_on_off.setOnClickListener {
-            isPregnant = prefs.getBoolean("pregnant_status", false)
             if (!check) {
                 //임신중
                 pregnant_on_off.setBackgroundResource(R.drawable.pregnant_on)
@@ -301,8 +333,9 @@ class BabyRegisterActivity : Activity() {
                     apply()
                     Log.d("test", "Pregnant2 : " + prefs.getBoolean("pregnant_status", false))
                 }
-                birthday_text.text = "생일"
-                birthday_line.setBackgroundResource(R.drawable.popup_line)
+                birthday_text.text = "출산 예정일"
+                birthday_line.setBackgroundResource(R.drawable.gender_popup_line)
+
                 check = true
             } else {
                 //임신중 아님
@@ -312,8 +345,8 @@ class BabyRegisterActivity : Activity() {
                     apply()
                     Log.d("test", "Pregnant1 : " + prefs.getBoolean("pregnant_status", false))
                 }
-                birthday_text.text = "출산 예정일"
-                birthday_line.setBackgroundResource(R.drawable.gender_popup_line)
+                birthday_text.text = "생일"
+                birthday_line.setBackgroundResource(R.drawable.popup_line)
                 check = false
             }
         }
@@ -325,10 +358,10 @@ class BabyRegisterActivity : Activity() {
         val month = calendar.get(Calendar.MONTH)
         val day = calendar.get(Calendar.DAY_OF_MONTH)
         var context: Context = ContextThemeWrapper(this, R.style.MyDatePickerSpinnerStyle)
-        /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             // API 24 이상일 경우 시스템 기본 테마 사용
             context = this
-        }*/
+        }
         val datePickerDialog = DatePickerDialog(context, dateSetListener, year, month, day)
         datePickerDialog.show()
 

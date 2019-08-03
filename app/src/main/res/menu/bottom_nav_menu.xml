@@ -2,26 +2,36 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-            android:id="@+id/navigation_home"
-            android:icon="@drawable/ic_home_black_24dp"
+            android:id="@+id/navigation_camera"
+            android:icon="@drawable/camera_icon"
+            android:checked="true"
+            android:iconTint="@color/greyTextColor"
             android:title="@string/title_home"/>
 
     <item
-            android:id="@+id/navigation_dashboard"
-            android:icon="@drawable/ic_dashboard_black_24dp"
+            android:id="@+id/navigation_calendar"
+            android:icon="@drawable/calendar_icon"
+            android:checked="true"
+            android:iconTint="@color/greyTextColor"
             android:title="@string/title_dashboard"/>
 
     <item
-            android:id="@+id/navigation_notifications"
-            android:icon="@drawable/ic_notifications_black_24dp"
+            android:id="@+id/navigation_checklist"
+            android:icon="@drawable/check_list_icon"
+            android:checked="true"
+            android:iconTint="@color/greyTextColor"
             android:title="@string/title_notifications"/>
     <item
-            android:id="@+id/navigation_setting"
-            android:icon="@drawable/ic_home_black_24dp"
+            android:id="@+id/navigation_information"
+            android:icon="@drawable/infomation_icon"
+            android:checked="true"
+            android:iconTint="@color/greyTextColor"
             android:title="@string/title_notifications"/>
     <item
-            android:id="@+id/navigation_more"
-            android:icon="@drawable/ic_dashboard_black_24dp"
+            android:id="@+id/navigation_memo"
+            android:icon="@drawable/memo_icon"
+            android:iconTint="@color/greyTextColor"
+            android:checked="true"
             android:title="@string/title_notifications"/>
 
 </menu>

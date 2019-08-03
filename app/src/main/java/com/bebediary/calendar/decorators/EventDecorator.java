@@ -20,9 +20,18 @@ public class EventDecorator implements DayViewDecorator {
     private int color;
     private HashSet<CalendarDay> dates;
 
+    private String contents;
+
     public EventDecorator(int color, Collection<CalendarDay> dates, Activity context) {
         drawable = context.getResources().getDrawable(R.drawable.more);
         this.color = color;
+        this.dates = new HashSet<>(dates);
+    }
+
+    public EventDecorator(int color, String string, Collection<CalendarDay> dates, Activity context) {
+        drawable = context.getResources().getDrawable(R.drawable.more);
+        this.color = color;
+        this.contents = string;
         this.dates = new HashSet<>(dates);
     }
 
@@ -34,6 +43,7 @@ public class EventDecorator implements DayViewDecorator {
     @Override
     public void decorate(DayViewFacade view) {
         view.setSelectionDrawable(drawable);
-        view.addSpan(new DotSpan(5, color)); // 날자밑에 점
+        view.addSpan(new DotSpan(8, color)); // 날자밑에 점
+        view.addSpan(contents);
     }
 }
