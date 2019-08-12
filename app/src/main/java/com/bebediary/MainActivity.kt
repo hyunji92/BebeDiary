@@ -4,19 +4,34 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
+import android.support.design.widget.NavigationView
+import android.support.v4.view.GravityCompat
+import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import android.view.MenuItem
 import android.view.View
 import com.bebediary.calendar.CalendarFragment
+import com.bebediary.checklist.CheckListActivity
 import com.bebediary.memo.NoteListActivity
 import com.bebediary.register.BabyRegisterActivity
 import com.hyundeee.app.usersearch.YameTest
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.contents_main.*
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
+
+    override fun onNavigationItemSelected(p0: MenuItem): Boolean {
+        dl_main_drawer_root.closeDrawer(GravityCompat.START)
+        return false
+    }
+
+    lateinit var drawerToggle: ActionBarDrawerToggle
+
     lateinit var prefs: SharedPreferences
     lateinit var editor: SharedPreferences.Editor
 
@@ -35,11 +50,14 @@ class MainActivity : AppCompatActivity() {
                 Log.d("test", "test calendar")
                 main_all_Scrollview.visibility = View.GONE
                 frame_layout.visibility = View.VISIBLE
-                transaction.replace(R.id.frame_layout, calendarFragment).commitAllowingStateLoss();
+                transaction.replace(R.id.frame_layout, calendarFragment).commitAllowingStateLoss()
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_checklist -> {
                 Log.d("test", "test checklist")
+                val intent = Intent(this@MainActivity, CheckListActivity::class.java)
+                //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK and Intent.FLAG_ACTIVITY_CLEAR_TASK and Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                startActivity(intent)
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_information -> {
@@ -51,7 +69,6 @@ class MainActivity : AppCompatActivity() {
                 val intent = Intent(this@MainActivity, NoteListActivity::class.java)
                 //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK and Intent.FLAG_ACTIVITY_CLEAR_TASK and Intent.FLAG_ACTIVITY_CLEAR_TOP)
                 startActivity(intent)
-
                 return@OnNavigationItemSelectedListener true
             }
         }
@@ -59,6 +76,36 @@ class MainActivity : AppCompatActivity() {
     }
 
     lateinit var testImage: String
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        if (dl_main_drawer_root.isDrawerOpen(GravityCompat.START)) {
+            dl_main_drawer_root.closeDrawer(GravityCompat.START)
+        } else {
+            super.onBackPressed()
+        }
+
+    }
+
+    override fun onPostCreate(savedInstanceState: Bundle?) {
+        super.onPostCreate(savedInstanceState)
+        drawerToggle.syncState()
+
+
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration?) {
+        super.onConfigurationChanged(newConfig)
+        drawerToggle.onConfigurationChanged(newConfig)
+
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        if (drawerToggle.onOptionsItemSelected(item)) {
+            return true
+        }
+        return super.onOptionsItemSelected(item)
+    }
 
     @SuppressLint("CheckResult")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -70,6 +117,16 @@ class MainActivity : AppCompatActivity() {
             isItemHorizontalTranslationEnabled = false
             setOnNavigationItemSelectedListener(onNavigationItemSelectedListener)
         }
+
+        drawerToggle = ActionBarDrawerToggle(
+            this,
+            dl_main_drawer_root,
+            toolbar,
+            R.string.drawer_open,
+            R.string.drawer_close
+        )
+        dl_main_drawer_root.addDrawerListener(drawerToggle)
+        nv_main_navigation_root.setNavigationItemSelectedListener(this)
 
         prefs = getSharedPreferences("baby_info", Context.MODE_PRIVATE)
         editor = prefs.edit()
@@ -110,6 +167,11 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             }
+        }
+
+        go_to_home.setOnClickListener {
+            main_all_Scrollview.visibility = View.VISIBLE
+            frame_layout.visibility = View.GONE
         }
     }
 

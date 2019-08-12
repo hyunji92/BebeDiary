@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item
+                android:id="@+id/more_baby"
+                android:icon="@drawable/more_baby_icon"
+                android:title="아기추가"
+        />
+        <item
+                android:id="@+id/guide"
+                android:icon="@drawable/guide_icon"
+                android:title="이용가이드"
+        />
+        <item
+                android:id="@+id/pregnant_guide"
+                android:icon="@drawable/pregnant_info_icon"
+                android:title="임신/출산정보"
+        />
+        <item
+                android:id="@+id/together"
+                android:icon="@drawable/together_icon"
+                android:title="제휴문의"
+        />
+        <item
+                android:id="@+id/bug"
+                android:icon="@drawable/bug_icon"
+                android:title="오류신고"
+        />
+    </group>
+</menu>

@@ -31,6 +31,7 @@ class AddNoteActivity : AppCompatActivity() {
             et_title.setText(note.title)
             et_content.setText(note.content)
         }
+
         button.setOnClickListener {
             if (update) {
                 note.content = et_content.text.toString()

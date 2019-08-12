@@ -35,7 +35,7 @@ class CalendarFragment : Fragment() {
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        var view = inflater.inflate(R.layout.fragment_calendar, container, false);
+        var view = inflater.inflate(R.layout.fragment_calendar, container, false)
         materialCalendarView = view.findViewById(R.id.calendarView) as MaterialCalendarView
 
         materialCalendarView.state().edit()
