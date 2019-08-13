@@ -41,7 +41,7 @@ class BabyRegisterActivity : Activity() {
 
     lateinit var imgUri: Uri
     lateinit var photoURI: Uri
-
+    lateinit var contentUri: Uri
 
 
     lateinit var mCurrentPhotoPath: String
@@ -98,7 +98,15 @@ class BabyRegisterActivity : Activity() {
         register_baby.setOnClickListener {
             saveBabyInfo()
             editor.apply()
-            YameTest.testSubject.onNext(imgUri)
+
+            var test = prefs.getString("album_image", null)
+            Log.d("test" , "test camera image : " + test)
+            if ( test == null || test == ""){
+                YameTest.testSubject?.onNext(imgUri)
+            } else {
+                Log.d("test" , "test album image : " + test)
+                YameTest.testSubject?.onNext(photoURI)
+            }
             this.finish()
         }
 
@@ -148,7 +156,6 @@ class BabyRegisterActivity : Activity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
 
         if (resultCode !== RESULT_OK) {
-            Toast.makeText(this, "취소 되었습니다.", Toast.LENGTH_SHORT).show()
             tempFile?.run {
                 if (tempFile!!.exists()) {
                     if (tempFile!!.delete()) {
@@ -174,10 +181,9 @@ class BabyRegisterActivity : Activity() {
                     baby_image.setImageURI(photoURI)
                     baby_image.invalidate()
 
-                    editor.putString("image", imgUri.toString())
-                    editor.apply()
+                    editor.putString("album_image", photoURI.toString())
 
-//                    YameTest.testSubject.onNext(albumURI)
+                    //YameTest.testSubject?.onNext(photoURI)
 
                     //cropImage();
                 } catch (e: Exception) {
@@ -195,9 +201,8 @@ class BabyRegisterActivity : Activity() {
                 baby_image.setImageURI(imgUri)
 
                 editor.putString("image", imgUri.toString())
-                editor.apply()
 
-//                YameTest.testSubject.onNext(imgUri)
+                //YameTest.testSubject?.onNext(imgUri)
 
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -211,7 +216,7 @@ class BabyRegisterActivity : Activity() {
 
         val mediaScanIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
         val f = File(mCurrentPhotoPath)
-        val contentUri = Uri.fromFile(f)
+        contentUri = Uri.fromFile(f)
         mediaScanIntent.data = contentUri
         sendBroadcast(mediaScanIntent)
         Toast.makeText(this, "사진이 저장되었습니다", Toast.LENGTH_SHORT).show()

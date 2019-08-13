@@ -7,8 +7,8 @@ import io.reactivex.subjects.PublishSubject
 /**
  * Created by jeonghyeonji on 2017. 8. 8..
  */
-class YameTest {
+open class YameTest {
     companion object {
-        val testSubject: PublishSubject<Uri> = PublishSubject.create()
+        val testSubject: PublishSubject<Uri>? = PublishSubject.create()
     }
 }
