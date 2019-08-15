@@ -3,8 +3,8 @@ package com.bebediary.memo
 import android.content.Intent
 import android.os.AsyncTask
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.LinearLayoutManager
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ImageButton
@@ -74,7 +74,7 @@ class NoteListActivity : AppCompatActivity(), NotesAdapter.OnNoteItemClick {
         val addMemoBtn = findViewById<View>(R.id.add_memo_button) as ImageButton
         addMemoBtn.setOnClickListener(listener)
 
-        recycler_view.layoutManager = LinearLayoutManager(this@NoteListActivity)
+        recycler_view.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this@NoteListActivity)
         notes = ArrayList()
         notesAdapter = NotesAdapter(notes, this@NoteListActivity)
         recycler_view.adapter = notesAdapter

@@ -1,15 +1,13 @@
 package com.bebediary.calendar.decorators;
 
 import android.content.Context;
-import android.graphics.Color;
-import android.support.v4.app.FragmentActivity;
+import androidx.fragment.app.FragmentActivity;
 import android.text.style.ForegroundColorSpan;
 import com.bebediary.R;
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.DayViewDecorator;
 import com.prolificinteractive.materialcalendarview.DayViewFacade;
 
-import java.net.ContentHandler;
 import java.util.Calendar;
 
 /**

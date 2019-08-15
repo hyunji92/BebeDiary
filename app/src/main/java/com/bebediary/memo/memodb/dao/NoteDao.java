@@ -1,6 +1,6 @@
 package com.bebediary.memo.memodb.dao;
 
-import android.arch.persistence.room.*;
+import androidx.room.*;
 import com.bebediary.memo.memodb.model.Note;
 import com.bebediary.util.Constants;
 

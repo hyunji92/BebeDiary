@@ -11,7 +11,7 @@
         tools:context=".MainActivity">
 
 
-    <android.support.v7.widget.Toolbar
+    <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar_top"
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
@@ -75,10 +75,10 @@
             </LinearLayout>
         </RelativeLayout>
 
-    </android.support.v7.widget.Toolbar>
+    </androidx.appcompat.widget.Toolbar>
 
     // 채크 리스트
-    <android.support.v7.widget.RecyclerView
+    <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/check_recycler_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
