@@ -6,11 +6,10 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
-import com.google.android.material.bottomnavigation.BottomNavigationView
-import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
 import android.view.MenuItem
 import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
@@ -20,8 +19,8 @@ import com.bebediary.calendar.CalendarFragment
 import com.bebediary.database.model.BabyModel
 import com.bebediary.memo.NoteListActivity
 import com.bebediary.register.BabyRegisterActivity
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationView
-import com.hyundeee.app.usersearch.YameTest
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
@@ -77,8 +76,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
         false
     }
-
-    lateinit var testImage: String
 
     @SuppressLint("CheckResult")
     override fun onCreate(savedInstanceState: Bundle?) {
