@@ -8,19 +8,19 @@ import androidx.room.PrimaryKey
 import java.util.*
 
 @Entity(
-    foreignKeys = [
-        ForeignKey(
-            entity = Baby::class,
-            parentColumns = ["id"],
-            childColumns = ["babyId"],
-            onDelete = SET_NULL
-        )
-    ]
+        foreignKeys = [
+            ForeignKey(
+                    entity = Baby::class,
+                    parentColumns = ["id"],
+                    childColumns = ["babyId"],
+                    onDelete = SET_NULL
+            )
+        ]
 )
 data class Note(
-    @PrimaryKey(autoGenerate = true) val id: Long,
-    @ColumnInfo val babyId: Long,
-    @ColumnInfo val title: String,
-    @ColumnInfo val content: String,
-    @ColumnInfo val createdAt: Date
+        @PrimaryKey(autoGenerate = true) val id: Long = 0,
+        @ColumnInfo val babyId: Long,
+        @ColumnInfo var title: String,
+        @ColumnInfo var content: String,
+        @ColumnInfo val createdAt: Date = Date()
 )

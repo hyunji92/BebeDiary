@@ -1,141 +1,104 @@
 package com.bebediary.memo
 
 import android.content.Intent
-import android.os.AsyncTask
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.LinearLayoutManager
-import android.view.View
-import android.widget.AdapterView
-import android.widget.ImageButton
+import androidx.core.view.isVisible
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.OnLifecycleEvent
+import com.bebediary.MyApplication
 import com.bebediary.R
 import com.bebediary.memo.adapter.NotesAdapter
-import com.bebediary.memo.memodb.NoteDatabase
-import com.bebediary.memo.memodb.model.Note
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_memo.*
-import kotlinx.android.synthetic.main.note_list_item.*
-import java.lang.ref.WeakReference
-import java.util.*
 
-class NoteListActivity : AppCompatActivity(), NotesAdapter.OnNoteItemClick {
+class NoteListActivity : AppCompatActivity(), NotesAdapter.OnNoteItemClick, LifecycleObserver {
 
+    // Adapter
+    private val notesAdapter: NotesAdapter by lazy { NotesAdapter(this) }
 
-    private var noteDatabase: NoteDatabase? = null
-    lateinit var notes: MutableList<Note>
-    private var notesAdapter: NotesAdapter? = null
-    private var pos: Int = 0
+    // 아이 정보
+    private val babyId: Long
+        get() = intent.getLongExtra("babyId", -1L)
 
-    private val listener =
-        View.OnClickListener { startActivityForResult(Intent(this@NoteListActivity, AddNoteActivity::class.java), 100) }
+    // Composite Disposable
+    private val compositeDisposable by lazy { CompositeDisposable() }
+
+    // Database
+    private val db by lazy { (application as MyApplication).db }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_memo)
-        initializeVies()
-        displayList()
 
-        back_button.setOnClickListener {
-            this.finish()
+        // 아이 정보가 넘어오지 않았을때 화면 종료
+        if (this.babyId == -1L) {
+            finish()
+            return
         }
 
+        lifecycle.addObserver(this)
     }
 
+    /**
+     * 뷰 초기화
+     */
+    @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
+    fun initializeView() {
 
-    private fun displayList() {
-        noteDatabase = NoteDatabase.getInstance(this@NoteListActivity)
-        RetrieveTask(this).execute()
-    }
-
-    private class RetrieveTask// only retain a weak reference to the activity
-    internal constructor(context: NoteListActivity) : AsyncTask<Void, Void, List<Note>>() {
-
-        private val activityReference: WeakReference<NoteListActivity> = WeakReference(context)
-
-        override fun doInBackground(vararg voids: Void): List<Note>? {
-            return if (activityReference.get() != null)
-                activityReference.get()?.noteDatabase?.noteDao?.notes
-            else
-                null
-        }
-
-        override fun onPostExecute(notes: List<Note>?) {
-            if (notes != null && notes.isNotEmpty()) {
-                activityReference.get()?.notes?.clear()
-                activityReference.get()?.notes?.addAll(notes)
-
-                // hides empty text view
-                activityReference.get()?.empty_memo_text?.visibility = View.GONE
-                activityReference.get()?.notesAdapter?.notifyDataSetChanged()
-            }
-        }
-    }
-
-    private fun initializeVies() {
-        val addMemoBtn = findViewById<View>(R.id.add_memo_button) as ImageButton
-        addMemoBtn.setOnClickListener(listener)
-
-        recycler_view.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this@NoteListActivity)
-        notes = ArrayList()
-        notesAdapter = NotesAdapter(notes, this@NoteListActivity)
+        // RecyclerView 설정
         recycler_view.adapter = notesAdapter
+
+        // 툴바 뒤로가기 버튼 클릭
+        back_button.setOnClickListener { finish() }
+
+        // 글 작성 버튼 클릭
+        add_memo_button.setOnClickListener {
+            val intent = Intent(this, AddNoteActivity::class.java)
+                    .putExtra("babyId", babyId)
+            startActivity(intent)
+        }
+    }
+
+    /**
+     * 노트 데이터 요청
+     */
+    @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
+    fun fetchNotes() {
+        db.noteDao().getNotes(babyId = babyId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        {
+                            // 메모 비어있을때 보여주는 뷰 가시성 설정
+                            empty_memo_text.isVisible = it.isEmpty()
+
+                            notesAdapter.list.clear()
+                            notesAdapter.list.addAll(it)
+                            notesAdapter.notifyDataSetChanged()
+                        },
+                        { it.printStackTrace() }
+                )
+                .apply { compositeDisposable.add(this) }
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+    fun dispose() = compositeDisposable.dispose()
+
+    override fun onNoteClick(pos: Int) {
+
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == 100 && resultCode > 0) {
             if (resultCode == 1) {
-                notes.add(data!!.getSerializableExtra("note") as Note)
+//                notes.add(data!!.getSerializableExtra("note") as Note)
             } else if (resultCode == 2) {
-                notes[pos] = data!!.getSerializableExtra("note") as Note
+//                notes[pos] = data!!.getSerializableExtra("note") as Note
             }
-            listVisibility()
         }
-    }
-
-    override fun onNoteClick(pos: Int) {
-        /*AlertDialog.Builder(this@NoteListActivity)
-            .setTitle("Select Options")
-            .setItems(arrayOf("Delete", "Update")) { dialogInterface, i ->
-                when (i) {
-                    0 -> {
-                        noteDatabase!!.noteDao.deleteNote(notes[pos])
-                        notes.removeAt(pos)
-                        listVisibility()
-                    }
-                    1 -> {
-                        this@NoteListActivity.pos = pos
-                        startActivityForResult(
-                            Intent(
-                                this@NoteListActivity,
-                                AddNoteActivity::class.java
-                            ).putExtra("note", notes[pos]),
-                            100
-                        )
-                    }
-                }
-            }.show()
-*/
-        this@NoteListActivity.pos = pos
-        startActivityForResult(
-            Intent(
-                this@NoteListActivity,
-                AddNoteActivity::class.java
-            ).putExtra("note", notes[pos]),
-            100
-        )
-    }
-
-    private fun listVisibility() {
-        var emptyMsgVisibility = View.GONE
-        if (notes.size == 0) { // no item to display
-            if (empty_memo_text.visibility == View.GONE)
-                emptyMsgVisibility = View.VISIBLE
-        }
-        empty_memo_text.visibility = emptyMsgVisibility
-        notesAdapter?.notifyDataSetChanged()
-    }
-
-    override fun onDestroy() {
-        noteDatabase!!.cleanUp()
-        super.onDestroy()
     }
 }

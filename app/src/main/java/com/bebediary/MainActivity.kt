@@ -36,6 +36,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     // Database
     private val db by lazy { (application as MyApplication).db }
 
+    // 현재 선택된 아이 정보
+    private var currentBabyModel: BabyModel? = null
+
     lateinit var prefs: SharedPreferences
     lateinit var editor: SharedPreferences.Editor
 
@@ -44,6 +47,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private val calendarFragment = CalendarFragment()
 
     private val onNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
+
+        // 아이가 선택되어 있어야만 아래의 모든 작업을 할 수 있으므로 아이가 선택되어있지 않으면 리턴
+        val babyId = currentBabyModel?.baby?.id
+                ?: return@OnNavigationItemSelectedListener false
+
         val transaction = fragmentManager.beginTransaction()
         when (item.itemId) {
             R.id.navigation_camera -> {
@@ -66,14 +74,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_memo -> {
-                Log.d("test", "test memo")
                 val intent = Intent(this@MainActivity, NoteListActivity::class.java)
-                //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK and Intent.FLAG_ACTIVITY_CLEAR_TASK and Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                intent.putExtra("babyId", babyId)
                 startActivity(intent)
 
                 return@OnNavigationItemSelectedListener true
             }
         }
+
         false
     }
 
@@ -116,6 +124,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
                             // 아이 뷰 업데이트
                             invalidateBabyView(it)
+
+                            // 멤버 변수로 저장
+                            currentBabyModel = it
 
                             // Logging
                             Log.d("Main", "현재 선택된 아이 : $it")
