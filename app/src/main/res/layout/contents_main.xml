@@ -143,10 +143,10 @@
                 // 보여야 하는거
                 <ImageView
                         android:id="@+id/real_baby_image"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="315dp"
                         tools:background="@drawable/test_image"
-                        android:scaleType="fitXY"
+                        android:scaleType="centerCrop"
                         android:visibility="gone"/>
 
                 <ImageButton

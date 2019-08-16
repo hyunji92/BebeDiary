@@ -35,7 +35,7 @@ class BabyChangeAdapter : RecyclerView.Adapter<BabyChangeAdapter.ViewHolder>() {
 
         private fun bind(baby: BabyModel) {
             GlideApp.with(itemView)
-                    .load(baby.photo.file)
+                    .load(baby.photos.first().file)
                     .circleCrop()
                     .into(itemView.itemBabyChangeAvatar)
             itemView.itemBabyChangeName.text = baby.baby.name
