@@ -103,7 +103,7 @@
                         android:layout_width="185dp"
                         android:layout_height="185dp"
                         android:visibility="gone"
-                        android:background="@drawable/test_image"/>
+                        tools:background="@drawable/test_image"/>
 
                 <ImageView
                         android:id="@+id/baby_image_layout"
