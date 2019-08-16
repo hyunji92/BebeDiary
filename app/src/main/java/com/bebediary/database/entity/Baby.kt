@@ -7,18 +7,18 @@ import androidx.room.PrimaryKey
 import java.util.*
 
 @Entity(
-    foreignKeys = [
-        ForeignKey(
-            entity = Attachment::class,
-            parentColumns = ["id"],
-            childColumns = ["photoId"]
-        )
-    ]
+        foreignKeys = [
+            ForeignKey(
+                    entity = Attachment::class,
+                    parentColumns = ["id"],
+                    childColumns = ["photoId"]
+            )
+        ]
 )
 data class Baby(
-    @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    @ColumnInfo(name = "name") val name: String,
-    @ColumnInfo(name = "sex") val sex: Sex,
-    @ColumnInfo(name = "photoId") val photoId: Long? = null,
-    @ColumnInfo(name = "createdAt") val createdAt: Date = Date()
+        @PrimaryKey(autoGenerate = true) val id: Long = 0,
+        @ColumnInfo(name = "name") val name: String,
+        @ColumnInfo(name = "sex") val sex: Sex,
+        @ColumnInfo(name = "photoId") val photoId: Long? = null,
+        @ColumnInfo(name = "createdAt") val createdAt: Date = Date()
 )

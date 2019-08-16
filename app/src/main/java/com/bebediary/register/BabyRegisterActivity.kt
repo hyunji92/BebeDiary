@@ -23,10 +23,11 @@ import com.bebediary.GlideApp
 import com.bebediary.MyApplication
 import com.bebediary.R
 import com.bebediary.database.entity.Attachment
+import com.bebediary.database.entity.Baby
+import com.bebediary.database.entity.Sex
 import com.bebediary.util.extension.toAttachment
 import com.gun0912.tedpermission.PermissionListener
 import com.gun0912.tedpermission.TedPermission
-import com.hyundeee.app.usersearch.YameTest
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
@@ -43,12 +44,11 @@ class BabyRegisterActivity : Activity() {
         var tempFile: File? = null
     }
 
+    // Activity Result RequestCode
     private val pickFromAlbum = 1
     private val pickFromCamera = 2
 
     lateinit var imgUri: Uri
-    lateinit var photoURI: Uri
-
 
     lateinit var mCurrentPhotoPath: String
 
@@ -87,6 +87,9 @@ class BabyRegisterActivity : Activity() {
 
     var isPregnant: Boolean = false
 
+    // Baby 정보
+    private var photo: Attachment? = null
+
     // Composite Disposable
     private val compositeDisposable = CompositeDisposable()
 
@@ -110,16 +113,6 @@ class BabyRegisterActivity : Activity() {
         register_baby.setOnClickListener {
             saveBabyInfo()
             editor.apply()
-
-            var test = prefs.getString("album_image", null)
-            Log.d("test", "test camera image : " + test)
-            if (test == null || test == "") {
-                YameTest.testSubject?.onNext(imgUri)
-            } else {
-                Log.d("test", "test album image : " + test)
-                YameTest.testSubject?.onNext(photoURI)
-            }
-            this.finish()
         }
 
         date_picker_button.setOnClickListener { datePicker() }
@@ -141,7 +134,7 @@ class BabyRegisterActivity : Activity() {
                 showPickPhotoDialog()
             } else {
                 Toast.makeText(it.context, resources.getString(R.string.permission_2), Toast.LENGTH_LONG)
-                    .show()
+                        .show()
             }
         }
 
@@ -152,11 +145,11 @@ class BabyRegisterActivity : Activity() {
      */
     private fun showPickPhotoDialog() {
         AlertDialog.Builder(this)
-            .setTitle("사진등록")
-            .setItems(arrayOf("카메라", "갤러리")) { _, id ->
-                if (id == 0) takePhoto() else goToAlbum()
-            }
-            .show()
+                .setTitle("사진등록")
+                .setItems(arrayOf("카메라", "갤러리")) { _, id ->
+                    if (id == 0) takePhoto() else goToAlbum()
+                }
+                .show()
     }
 
     /**
@@ -180,15 +173,15 @@ class BabyRegisterActivity : Activity() {
         // 이미지 저장 및 설정
         val attachmentDao = db.attachmentDao()
         imageUri.toAttachment(this)
-            .flatMap { attachment -> attachmentDao.insert(attachment) }
-            .flatMap { id -> db.attachmentDao().getById(id) }
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(
-                { invalidatePhotoView(it) },
-                { it.printStackTrace() }
-            )
-            .apply { compositeDisposable.add(this) }
+                .flatMap { attachment -> attachmentDao.insert(attachment) }
+                .flatMap { id -> db.attachmentDao().getById(id) }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        { invalidatePhotoView(it) },
+                        { it.printStackTrace() }
+                )
+                .apply { compositeDisposable.add(this) }
     }
 
     /**
@@ -230,17 +223,21 @@ class BabyRegisterActivity : Activity() {
      * Attachment 데이터를 넘겨받아 유저의 이미지뷰를 업데이트한다
      */
     private fun invalidatePhotoView(attachment: Attachment) {
+
+        // 아이 정보 업데이트
+        photo = attachment
+
+        // View 업데이트
         empty_baby_image_register.isVisible = false
         baby_image.isVisible = true
         baby_image_layout.isVisible = true
 
         // 이미지 로딩
         GlideApp.with(this)
-            .load(attachment.file)
-            .centerCrop()
-            .circleCrop()
-            .into(baby_image)
-        baby_image.invalidate()
+                .load(attachment.file)
+                .centerCrop()
+                .circleCrop()
+                .into(baby_image)
     }
 
     @Throws(IOException::class)
@@ -259,49 +256,72 @@ class BabyRegisterActivity : Activity() {
         return imageFile
     }
 
+    /**
+     * 스토리지 권한 설정
+     */
     private fun tedPermission() {
-        val permissionListener = object : PermissionListener {
-            override fun onPermissionGranted() {
-                // 권한 요청 성공
-                isPermission = true
-            }
-
-            override fun onPermissionDenied(deniedPermissions: ArrayList<String>) {
-                // 권한 요청 실패
-                isPermission = false
-            }
-        }
-
         TedPermission.with(this)
-            .setPermissionListener(permissionListener)
-            .setRationaleMessage(resources.getString(R.string.permission_2))
-            .setDeniedMessage(resources.getString(R.string.permission_1))
-            .setPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA)
-            .check()
+                .setPermissionListener(object : PermissionListener {
+                    override fun onPermissionGranted() {
+                        // 권한 요청 성공
+                        isPermission = true
+                    }
+
+                    override fun onPermissionDenied(deniedPermissions: ArrayList<String>) {
+                        // 권한 요청 실패
+                        isPermission = false
+                    }
+                })
+                .setRationaleMessage(resources.getString(R.string.permission_2))
+                .setDeniedMessage(resources.getString(R.string.permission_1))
+                .setPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA)
+                .check()
     }
 
-    // 이름, 성별, 몇일
-    fun saveBabyInfo() {
-        if (baby_name.text.toString() != "" || baby_name.text.toString() != null) {
-            editor.apply {
-                putString("baby_name", baby_name.text.toString())
-                apply()
-            }
-        }
-        Log.d("test", "EditText nane : " + baby_name.text.toString())
+    /**
+     * 아이 정보 데이터 베이스에 저장
+     */
+    private fun saveBabyInfo() {
 
-        if (baby_gender.text.toString() != "" || baby_gender.text.toString() != null) {
-            editor.apply {
-                putString("baby_gender", baby_gender.text.toString())
-                apply()
-            }
+        // 이름 입력 여부 확인
+        if (baby_name.text.isNullOrBlank()) {
+            Toast.makeText(this, "이름을 입력해주세요", Toast.LENGTH_SHORT).show()
+            return
         }
 
-        //알람 몇일 전 ? 저장 ( 라이디오 버튼 값 )
+        // 성별 선택 여부 확인
+        if (!babyRegisterMale.isChecked && !babyRegisterFeMale.isChecked) {
+            Toast.makeText(this, "성별을 선택해주세요", Toast.LENGTH_SHORT).show()
+            return
+        }
 
+        // 사진 선택
+        if (photo == null) {
+            Toast.makeText(this, "사진을 선택해주세요", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // 아이 정보 생성
+        val baby = Baby(
+                name = baby_name.text.toString(),
+                sex = if (babyRegisterMale.isChecked) Sex.Male else Sex.Female,
+                photoId = photo?.id ?: throw IllegalStateException("사진 아이디가 존재하지 않습니다")
+        )
+
+        // 데이터 입력
+        db.babyDao().insert(baby)
+                .subscribeOn(Schedulers.io())
+                .subscribe(
+                        { finish() },
+                        {
+                            Toast.makeText(this, "아이 데이터 생성에 실패하였습니다", Toast.LENGTH_SHORT).show()
+                            it.printStackTrace()
+                        }
+                )
+                .apply { compositeDisposable.add(this) }
     }
 
-    fun setPregnantStatus() {
+    private fun setPregnantStatus() {
         var check = false
         isPregnant = prefs.getBoolean("pregnant_status", false)
         if (isPregnant) {
@@ -343,7 +363,7 @@ class BabyRegisterActivity : Activity() {
         }
     }
 
-    fun datePicker() {
+    private fun datePicker() {
         val calendar = Calendar.getInstance()
         val year = calendar.get(Calendar.YEAR)
         val month = calendar.get(Calendar.MONTH)

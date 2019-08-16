@@ -9,15 +9,18 @@ import android.os.Bundle
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
+import android.view.MenuItem
 import android.view.View
+import com.bebediary.baby.change.BabyChangeActivity
 import com.bebediary.calendar.CalendarFragment
 import com.bebediary.memo.NoteListActivity
 import com.bebediary.register.BabyRegisterActivity
+import com.google.android.material.navigation.NavigationView
 import com.hyundeee.app.usersearch.YameTest
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.contents_main.*
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     lateinit var prefs: SharedPreferences
     lateinit var editor: SharedPreferences.Editor
 
@@ -71,6 +74,9 @@ class MainActivity : AppCompatActivity() {
             isItemHorizontalTranslationEnabled = false
             setOnNavigationItemSelectedListener(onNavigationItemSelectedListener)
         }
+
+        // 메인 네비게이션 클릭 리스너
+        nv_main_navigation_root.setNavigationItemSelectedListener(this)
 
         prefs = getSharedPreferences("baby_info", Context.MODE_PRIVATE)
         editor = prefs.edit()
@@ -165,6 +171,19 @@ class MainActivity : AppCompatActivity() {
                 imageOn = true
             }
         }
+    }
+
+    /**
+     * Navigation Item 선택시 불리는 리스너
+     */
+    override fun onNavigationItemSelected(menuItem: MenuItem): Boolean {
+        when (menuItem.itemId) {
+            R.id.more_baby -> {
+                startActivity(Intent(this, BabyChangeActivity::class.java))
+            }
+        }
+
+        return false
     }
 
 /*
