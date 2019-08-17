@@ -9,5 +9,5 @@ final public class Constants {
     }
 
     // Request Codes
-    public static int requestCameraCode = 1;
+    public static int requestCameraCode = 0x0101;
 }

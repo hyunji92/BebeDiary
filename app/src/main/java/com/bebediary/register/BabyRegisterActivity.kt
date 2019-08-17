@@ -11,20 +11,20 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
-import android.provider.MediaStore
 import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.View
 import android.view.Window
 import android.widget.Toast
-import androidx.core.content.FileProvider
 import androidx.core.view.isVisible
 import com.bebediary.GlideApp
 import com.bebediary.MyApplication
 import com.bebediary.R
+import com.bebediary.camera.CameraWrapperActivity
 import com.bebediary.database.entity.Attachment
 import com.bebediary.database.entity.Baby
 import com.bebediary.database.entity.Sex
+import com.bebediary.util.Constants
 import com.bebediary.util.extension.toAttachment
 import com.gun0912.tedpermission.PermissionListener
 import com.gun0912.tedpermission.TedPermission
@@ -46,7 +46,6 @@ class BabyRegisterActivity : Activity() {
 
     // Activity Result RequestCode
     private val pickFromAlbum = 1
-    private val pickFromCamera = 2
 
     lateinit var imgUri: Uri
 
@@ -164,16 +163,19 @@ class BabyRegisterActivity : Activity() {
         }
 
         // 이미지 선택 URI
-        val imageUri = when (requestCode) {
-            pickFromAlbum -> data.data // 앨범에서 이미지를 선택했을경우
-            pickFromCamera -> imgUri // 카메라 촬영으로 이미지를 가져왔을 경우
+        val attachment = when (requestCode) {
+            pickFromAlbum ->
+                data.data?.toAttachment(this) // 앨범에서 이미지를 선택했을경우
+            Constants.requestCameraCode -> {
+                File(data.getStringExtra("imagePath")).toAttachment(this) // 카메라 촬영으로 이미지를 가져왔을 경우
+            }
             else -> null
         } ?: return
 
         // 이미지 저장 및 설정
         val attachmentDao = db.attachmentDao()
-        imageUri.toAttachment(this)
-                .flatMap { attachment -> attachmentDao.insert(attachment) }
+        attachment
+                .flatMap { attachmentDao.insert(it) }
                 .flatMap { id -> db.attachmentDao().getById(id) }
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -196,27 +198,8 @@ class BabyRegisterActivity : Activity() {
      * 사진 촬영 요청
      */
     private fun takePhoto() {
-        val state = Environment.getExternalStorageState()
-        if (Environment.MEDIA_MOUNTED == state) {
-            val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-            if (intent.resolveActivity(packageManager) != null) {
-                var photoFile: File? = null
-                try {
-                    photoFile = createImageFile()
-                } catch (e: IOException) {
-                    e.printStackTrace()
-                }
-                if (photoFile != null) {
-                    val providerURI = FileProvider.getUriForFile(this, packageName.plus(".provider"), photoFile)
-                    imgUri = providerURI
-                    intent.putExtra(MediaStore.EXTRA_OUTPUT, providerURI)
-                    startActivityForResult(intent, pickFromCamera)
-                }
-            }
-        } else {
-            Log.v("알림", "저장공간에 접근 불가능")
-            return
-        }
+        val intent = Intent(this, CameraWrapperActivity::class.java)
+        startActivityForResult(intent, Constants.requestCameraCode)
     }
 
     /**
