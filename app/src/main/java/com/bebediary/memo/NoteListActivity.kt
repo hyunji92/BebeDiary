@@ -9,6 +9,7 @@ import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import com.bebediary.MyApplication
 import com.bebediary.R
+import com.bebediary.database.entity.Note
 import com.bebediary.memo.adapter.NotesAdapter
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -76,8 +77,8 @@ class NoteListActivity : AppCompatActivity(), NotesAdapter.OnNoteItemClick, Life
                             // 메모 비어있을때 보여주는 뷰 가시성 설정
                             empty_memo_text.isVisible = it.isEmpty()
 
-                            notesAdapter.list.clear()
-                            notesAdapter.list.addAll(it)
+                            notesAdapter.items.clear()
+                            notesAdapter.items.addAll(it)
                             notesAdapter.notifyDataSetChanged()
                         },
                         { it.printStackTrace() }
@@ -88,17 +89,13 @@ class NoteListActivity : AppCompatActivity(), NotesAdapter.OnNoteItemClick, Life
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     fun dispose() = compositeDisposable.dispose()
 
-    override fun onNoteClick(pos: Int) {
-
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == 100 && resultCode > 0) {
-            if (resultCode == 1) {
-//                notes.add(data!!.getSerializableExtra("note") as Note)
-            } else if (resultCode == 2) {
-//                notes[pos] = data!!.getSerializableExtra("note") as Note
-            }
-        }
+    /**
+     * 노트 선택해서 수정 모드 진입
+     */
+    override fun onNoteClick(note: Note) {
+        val intent = Intent(this, AddNoteActivity::class.java)
+        intent.putExtra("noteId", note.id)
+        intent.putExtra("babyId", babyId)
+        startActivity(intent)
     }
 }

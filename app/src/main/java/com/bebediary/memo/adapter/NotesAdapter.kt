@@ -4,7 +4,6 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bebediary.R
 import com.bebediary.database.entity.Note
@@ -17,7 +16,8 @@ class NotesAdapter(context: Context) : RecyclerView.Adapter<NotesAdapter.BeanHol
     // 날짜 포멧
     private val dateFormat by lazy { SimpleDateFormat("YYYY.MM.dd", Locale.getDefault()) }
 
-    var list = arrayListOf<Note>()
+    // 아이템
+    var items = arrayListOf<Note>()
 
     private val onNoteItemClick: OnNoteItemClick
 
@@ -30,35 +30,40 @@ class NotesAdapter(context: Context) : RecyclerView.Adapter<NotesAdapter.BeanHol
     }
 
     override fun onBindViewHolder(holder: BeanHolder, position: Int) {
-        val item = list[position]
-        holder.textViewTitle.text = item.title
-        holder.textViewContent.text = item.content
-        holder.textViewDate.text = dateFormat.format(item.createdAt)
+        val item = items[position]
+        holder.note = item
     }
 
-    override fun getItemCount(): Int {
-        return list.size
-    }
+    override fun getItemCount() = items.count()
 
-    inner class BeanHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
+    inner class BeanHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-        var textViewContent: TextView
-        var textViewTitle: TextView
-        var textViewDate: TextView
+        // 메모 데이터
+        var note: Note? = null
+            set(value) {
+                field = value
+                if (value != null) {
+                    bind(value)
+                }
+            }
 
         init {
-            itemView.setOnClickListener(this)
-            textViewContent = itemView.item_text
-            textViewTitle = itemView.tv_title
-            textViewDate = itemView.tv_date
+            itemView.setOnClickListener {
+                val item = note
+                if (item != null) {
+                    onNoteItemClick.onNoteClick(item)
+                }
+            }
         }
 
-        override fun onClick(view: View) {
-            onNoteItemClick.onNoteClick(adapterPosition)
+        private fun bind(note: Note) {
+            itemView.tv_title.text = note.title
+            itemView.item_text.text = note.content
+            itemView.tv_date.text = dateFormat.format(note.createdAt)
         }
     }
 
     interface OnNoteItemClick {
-        fun onNoteClick(pos: Int)
+        fun onNoteClick(note: Note)
     }
 }

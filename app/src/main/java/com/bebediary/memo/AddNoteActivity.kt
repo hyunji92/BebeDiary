@@ -97,7 +97,7 @@ class AddNoteActivity : AppCompatActivity(), LifecycleObserver {
 
     private fun edit() {
         val sourceNote = note ?: return
-        sourceNote.title = et_content.text.toString()
+        sourceNote.title = et_title.text.toString()
         sourceNote.content = et_content.text.toString()
         db.noteDao().update(sourceNote)
                 .subscribeOn(Schedulers.io())
@@ -110,7 +110,7 @@ class AddNoteActivity : AppCompatActivity(), LifecycleObserver {
     }
 
     private fun save() {
-        val note = Note(title = et_content.text.toString(), content = et_content.text.toString(), babyId = babyId)
+        val note = Note(title = et_title.text.toString(), content = et_content.text.toString(), babyId = babyId)
         db.noteDao().insert(note)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
