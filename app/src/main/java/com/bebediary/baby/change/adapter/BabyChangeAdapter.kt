@@ -9,7 +9,9 @@ import com.bebediary.R
 import com.bebediary.database.model.BabyModel
 import kotlinx.android.synthetic.main.item_baby_change.view.*
 
-class BabyChangeAdapter : RecyclerView.Adapter<BabyChangeAdapter.ViewHolder>() {
+class BabyChangeAdapter(
+        private val babyChangeInterface: BabyChangeInterface
+) : RecyclerView.Adapter<BabyChangeAdapter.ViewHolder>() {
 
     var items = arrayListOf<BabyModel>()
 
@@ -17,11 +19,11 @@ class BabyChangeAdapter : RecyclerView.Adapter<BabyChangeAdapter.ViewHolder>() {
         return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_baby_change, parent, false))
     }
 
-    override fun getItemCount(): Int = items.count()
+    override fun getItemCount(): Int = items.count() + 1
 
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.item = items[position]
+        holder.item = items.getOrNull(position)
     }
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -30,8 +32,28 @@ class BabyChangeAdapter : RecyclerView.Adapter<BabyChangeAdapter.ViewHolder>() {
                 field = value
                 if (value != null) {
                     bind(value)
+                } else {
+                    bindAddBaby()
                 }
             }
+
+        init {
+            itemView.setOnClickListener {
+                if (item == null) {
+                    babyChangeInterface.addBaby()
+                } else {
+                    babyChangeInterface.changeBaby()
+                }
+            }
+        }
+
+        private fun bindAddBaby() {
+            GlideApp.with(itemView)
+                    .load(R.drawable.add_baby_image)
+                    .circleCrop()
+                    .into(itemView.itemBabyChangeAvatar)
+            itemView.itemBabyChangeName.text = "추가하기"
+        }
 
         private fun bind(baby: BabyModel) {
             GlideApp.with(itemView)

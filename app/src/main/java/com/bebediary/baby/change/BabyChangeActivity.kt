@@ -1,5 +1,6 @@
 package com.bebediary.baby.change
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
@@ -8,15 +9,17 @@ import androidx.lifecycle.OnLifecycleEvent
 import com.bebediary.MyApplication
 import com.bebediary.R
 import com.bebediary.baby.change.adapter.BabyChangeAdapter
+import com.bebediary.baby.change.adapter.BabyChangeInterface
+import com.bebediary.register.BabyRegisterActivity
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_baby_change.*
 
-class BabyChangeActivity : AppCompatActivity(), LifecycleObserver {
+class BabyChangeActivity : AppCompatActivity(), LifecycleObserver, BabyChangeInterface {
 
     // 아기 변경 어뎁터
-    private val babyChangeAdapter by lazy { BabyChangeAdapter() }
+    private val babyChangeAdapter by lazy { BabyChangeAdapter(this) }
 
     // Database
     private val db by lazy { (application as MyApplication).db }
@@ -57,5 +60,14 @@ class BabyChangeActivity : AppCompatActivity(), LifecycleObserver {
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     fun dispose() {
         compositeDisposable.dispose()
+    }
+
+    override fun addBaby() {
+        val intent = Intent(this@BabyChangeActivity, BabyRegisterActivity::class.java)
+        startActivity(intent)
+    }
+
+    override fun changeBaby() {
+        // 유저 변경
     }
 }
