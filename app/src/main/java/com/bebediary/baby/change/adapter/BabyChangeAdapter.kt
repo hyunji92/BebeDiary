@@ -39,10 +39,11 @@ class BabyChangeAdapter(
 
         init {
             itemView.setOnClickListener {
-                if (item == null) {
+                val baby = item
+                if (baby == null) {
                     babyChangeInterface.addBaby()
                 } else {
-                    babyChangeInterface.changeBaby()
+                    babyChangeInterface.changeBaby(baby.baby)
                 }
             }
         }

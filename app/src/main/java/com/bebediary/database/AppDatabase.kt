@@ -15,7 +15,7 @@ import com.bebediary.database.entity.Note
 
 @Database(
     entities = [Baby::class, Attachment::class, Note::class],
-    version = 2
+    version = 3
 )
 @TypeConverters(SexTypeConverter::class, DateTypeConverter::class, FileTypeConverter::class)
 abstract class AppDatabase : RoomDatabase() {

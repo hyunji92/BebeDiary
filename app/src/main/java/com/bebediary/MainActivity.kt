@@ -114,7 +114,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
      */
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun fetchCurrentBaby() {
-        db.babyDao().getCurrent()
+        db.babyDao().getSelected()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
