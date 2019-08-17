@@ -8,10 +8,14 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bebediary.R
 import com.bebediary.database.entity.Note
+import kotlinx.android.synthetic.main.note_list_item.view.*
+import java.text.SimpleDateFormat
+import java.util.*
 
 class NotesAdapter(context: Context) : RecyclerView.Adapter<NotesAdapter.BeanHolder>() {
 
-    private val layoutInflater: LayoutInflater = LayoutInflater.from(context)
+    // 날짜 포멧
+    private val dateFormat by lazy { SimpleDateFormat("YYYY.MM.dd", Locale.getDefault()) }
 
     var list = arrayListOf<Note>()
 
@@ -22,13 +26,14 @@ class NotesAdapter(context: Context) : RecyclerView.Adapter<NotesAdapter.BeanHol
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BeanHolder {
-        return BeanHolder(layoutInflater.inflate(R.layout.note_list_item, parent, false))
+        return BeanHolder(LayoutInflater.from(parent.context).inflate(R.layout.note_list_item, parent, false))
     }
 
     override fun onBindViewHolder(holder: BeanHolder, position: Int) {
-        holder.textViewTitle.text = list[position].title
-        holder.textViewContent.text = list[position].content
-
+        val item = list[position]
+        holder.textViewTitle.text = item.title
+        holder.textViewContent.text = item.content
+        holder.textViewDate.text = dateFormat.format(item.createdAt)
     }
 
     override fun getItemCount(): Int {
@@ -37,13 +42,15 @@ class NotesAdapter(context: Context) : RecyclerView.Adapter<NotesAdapter.BeanHol
 
     inner class BeanHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
 
-        internal var textViewContent: TextView
-        internal var textViewTitle: TextView
+        var textViewContent: TextView
+        var textViewTitle: TextView
+        var textViewDate: TextView
 
         init {
             itemView.setOnClickListener(this)
-            textViewContent = itemView.findViewById(R.id.item_text)
-            textViewTitle = itemView.findViewById(R.id.tv_title)
+            textViewContent = itemView.item_text
+            textViewTitle = itemView.tv_title
+            textViewDate = itemView.tv_date
         }
 
         override fun onClick(view: View) {
