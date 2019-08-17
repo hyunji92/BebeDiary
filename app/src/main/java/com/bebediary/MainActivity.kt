@@ -1,6 +1,7 @@
 package com.bebediary
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -16,9 +17,12 @@ import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import com.bebediary.baby.change.BabyChangeActivity
 import com.bebediary.calendar.CalendarFragment
+import com.bebediary.camera.CameraResultActivity
+import com.bebediary.camera.CameraWrapperActivity
 import com.bebediary.database.model.BabyModel
 import com.bebediary.memo.NoteListActivity
 import com.bebediary.register.BabyRegisterActivity
+import com.bebediary.util.Constants
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationView
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -55,7 +59,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val transaction = fragmentManager.beginTransaction()
         when (item.itemId) {
             R.id.navigation_camera -> {
-                Log.d("test", "test camera")
+                openBabyCamera()
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_calendar -> {
@@ -247,6 +251,38 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     /**
+     * 사진 찍는 화면 열기
+     */
+    private fun openBabyCamera() {
+        val intent = Intent(this, CameraWrapperActivity::class.java)
+        startActivityForResult(intent, Constants.requestCameraCode)
+    }
+
+    /**
+     * 아이 사진 찍은 결과 화면 보여주는 액티비티 실행
+     */
+    private fun openBabyCameraResult(imagePath: String) {
+        val babyId = currentBabyModel?.baby?.id ?: return
+
+        val intent = Intent(this, CameraResultActivity::class.java)
+        intent.putExtra("babyId", babyId)
+        intent.putExtra("imagePath", imagePath)
+        startActivity(intent)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        // 사진 촬영 화면 누른 후 다시 돌아왔을때 이미지 경로가 있으면 사진 결과 화면 실행
+        if (requestCode == Constants.requestCameraCode && resultCode == Activity.RESULT_OK) {
+            val imagePath = data?.getStringExtra("imagePath")
+            if (imagePath != null) {
+                openBabyCameraResult(imagePath)
+            }
+        }
+    }
+
+    /**
      * Navigation Item 선택시 불리는 리스너
      */
     override fun onNavigationItemSelected(menuItem: MenuItem): Boolean {
@@ -258,47 +294,4 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         return false
     }
-
-/*
-중요 사이트
-https://promobile.tistory.com/193
-https://dpdpwl.tistory.com/3
-https://github.com/dolsanta/Sample_Calendar
-https://dpdpwl.tistory.com/3
-* */
-    /*참고 사이트
-
-    * https://webnautes.tistory.com/1216
-
-https://medium.com/@Patel_Prashant_/android-custom-calendar-with-events-fa48dfca8257
-
-https://dpdpwl.tistory.com/3
-
-https://www.google.com/search?q=android+calendarview+예제&rlz=1C5CHFA_enKR851KR851&oq=android+calendarview+예제&aqs=chrome..69i57.10103j0j4&sourceid=chrome&ie=UTF-8
-
-https://androi.tistory.com/136
-
-
-https://zeph1e.tistory.com/42
-
-https://drcarter.tistory.com/152
-
-https://www.dev2qa.com/android-one-time-repeat-alarm-example/
-
-https://gogorchg.tistory.com/entry/Android-AlarmManager%EB%A5%BC-%EC%9D%B4%EC%9A%A9%ED%95%9C-Schedule-%EA%B4%80%EB%A6%AC
-
-https://jamesdreaming.tistory.com/102
-
-https://namget.tistory.com/entry/%EC%95%88%EB%93%9C%EB%A1%9C%EC%9D%B4%EB%93%9C-%EC%95%88%EB%93%9C%EB%A1%9C%EC%9D%B4%EB%93%9C-%EC%BB%A4%EC%8A%A4%ED%85%80-%EB%8B%AC%EB%A0%A5-%EC%98%88%EC%A0%9C-Android-Custom-CalendarView-Example
-
-https://github.com/kuluna/CalendarViewPager
-
-https://hatti.tistory.com/entry/android-calendar
-
-https://github.com/hnhariat/calendar
-
-https://woochan-dev.tistory.com/27
-
-https://www.youtube.com/watch?v=xs5406vApTo
-    * */
 }
