@@ -153,7 +153,7 @@ class BabyRegisterActivity : Activity() {
         dialog.show()
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
 
         if (resultCode !== RESULT_OK) {
             tempFile?.run {
@@ -168,27 +168,29 @@ class BabyRegisterActivity : Activity() {
         }
 
         if (requestCode == PICK_FROM_ALBUM) {
-            if (data.data != null) {
-                try {
-                    var albumFile: File? = null
-                    albumFile = createImageFile()
-                    photoURI = data.data
-                    imgUri = Uri.fromFile(albumFile)
-                    galleryAddPick()
-                    empty_baby_image_register.visibility = View.GONE
-                    baby_image.visibility = View.VISIBLE
-                    baby_image_layout.visibility = View.VISIBLE
-                    baby_image.setImageURI(photoURI)
-                    baby_image.invalidate()
+            if (data != null) {
+                if (data.data != null) {
+                    try {
+                        var albumFile: File? = null
+                        albumFile = createImageFile()
+                        photoURI = data.data
+                        imgUri = Uri.fromFile(albumFile)
+                        galleryAddPick()
+                        empty_baby_image_register.visibility = View.GONE
+                        baby_image.visibility = View.VISIBLE
+                        baby_image_layout.visibility = View.VISIBLE
+                        baby_image.setImageURI(photoURI)
+                        baby_image.invalidate()
 
-                    editor.putString("album_image", photoURI.toString())
+                        editor.putString("album_image", photoURI.toString())
 
-                    //YameTest.testSubject?.onNext(photoURI)
+                        //YameTest.testSubject?.onNext(photoURI)
 
-                    //cropImage();
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    Log.v("알림", "앨범에서 가져오기 에러")
+                        //cropImage();
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        Log.v("알림", "앨범에서 가져오기 에러")
+                    }
                 }
             }
         } else if (requestCode == PICK_FROM_CAMERA) {

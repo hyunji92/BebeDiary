@@ -90,15 +90,13 @@
                     android:orientation="vertical"
                     android:visibility="gone"
                     tools:visibility="visible"
-                    android:gravity="center|center_vertical"
-                    android:layout_marginTop="190dp">
+                    android:layout_gravity="center"
+                    android:layout_marginTop="100dp">
 
                 <ImageButton
                         android:id="@+id/add_baby"
                         android:layout_width="300dp"
                         android:layout_height="250dp"
-                        android:layout_marginLeft="30dp"
-                        android:layout_gravity="center|center_horizontal"
                         android:background="@drawable/baby_empty"/>
             </LinearLayout>
 
