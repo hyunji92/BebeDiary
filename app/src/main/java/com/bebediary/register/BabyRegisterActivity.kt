@@ -16,6 +16,8 @@ import android.view.ContextThemeWrapper
 import android.view.View
 import android.view.Window
 import android.widget.Toast
+import androidx.core.view.isVisible
+import com.bebediary.GlideApp
 import com.bebediary.MyApplication
 import com.bebediary.R
 import com.bebediary.camera.CameraWrapperActivity
