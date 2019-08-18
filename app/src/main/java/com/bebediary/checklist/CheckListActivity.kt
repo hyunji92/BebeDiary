@@ -1,8 +1,8 @@
 package com.bebediary.checklist
 
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.LinearLayoutManager
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.bebediary.R
 import com.hyundeee.app.wingsui.adapter.CheckListAdapter
 import kotlinx.android.synthetic.main.activity_checklist.*
@@ -19,7 +19,11 @@ class CheckListActivity : AppCompatActivity() {
         back_button.setOnClickListener {
             this.finish()
         }
-        check_recycler_view.layoutManager = LinearLayoutManager(this@CheckListActivity, LinearLayoutManager.VERTICAL, false)
+        check_recycler_view.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(
+            this@CheckListActivity,
+            androidx.recyclerview.widget.LinearLayoutManager.VERTICAL,
+            false
+        )
         checkListAdapter = CheckListAdapter()
         check_recycler_view.adapter = checkListAdapter
     }

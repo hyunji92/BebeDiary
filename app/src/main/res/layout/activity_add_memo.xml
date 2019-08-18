@@ -1,88 +1,94 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:background="#ffffff">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#ffffff"
+    android:orientation="vertical">
 
-    <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar_top"
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            android:minHeight="?attr/actionBarSize"
-            android:background="#ffffff"
-            app:theme="@style/Widget.AppCompat.Toolbar">
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar_top"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#ffffff"
+        android:minHeight="?attr/actionBarSize"
+        app:theme="@style/Widget.AppCompat.Toolbar">
+
         <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerVertical="true"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"
                 android:orientation="horizontal">
 
-            <LinearLayout
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/back_button"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/ic_arrow_back"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center_vertical" />
+
+                <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_centerVertical="true"
-                    android:layout_alignParentStart="true">
-                <ImageButton
-                        android:id="@+id/back_button"
-                        android:layout_width="38dp"
-                        android:layout_height="38dp"
-                        android:gravity="center_vertical"
-                        android:layout_marginRight="5dp"
-                        android:layout_gravity="center_vertical"
-                        android:clickable="true"
-                        android:background="@drawable/ic_arrow_back"/>
-                <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="MEMO"
-                        android:textSize="20sp"
-                        android:gravity="center_vertical"
-                        android:layout_gravity="center_vertical"
-                        android:textColor="@color/registerPopupTextColor"/>
+                    android:layout_gravity="center_vertical"
+                    android:gravity="center_vertical"
+                    android:text="MEMO"
+                    android:textColor="@color/registerPopupTextColor"
+                    android:textSize="18sp" />
 
             </LinearLayout>
 
             <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical|end"
-                    android:layout_alignParentEnd="true"
-                    android:layout_marginTop="0dp"
-                    android:layout_alignParentTop="true"
-                    android:padding="6dp">
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="0dp"
+                android:layout_marginEnd="16dp"
+                android:gravity="center_vertical|end"
+                android:orientation="horizontal">
 
                 <Button
-                        android:id="@+id/save_button"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="#ffffff"
-                        android:layout_gravity="center_vertical"
-                        android:gravity="center_vertical|center_horizontal"
-                        android:textColor="@color/registerPopupTextColor"
-                        android:textSize="14sp"
-                        android:text="등록"/>
+                    android:id="@+id/save_button"
+                    android:layout_width="52dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:background="#ffffff"
+                    android:gravity="center_vertical|center_horizontal"
+                    android:text="등록"
+                    android:textColor="@color/registerPopupTextColor"
+                    android:textSize="14sp"
+                    tools:elevation="0dp" />
             </LinearLayout>
         </RelativeLayout>
 
-    </android.support.v7.widget.Toolbar>
+    </androidx.appcompat.widget.Toolbar>
 
     <View
-            android:layout_width="match_parent"
-            android:layout_height="8dp"
-            android:background="@color/greyBackground"/>
+        android:layout_width="match_parent"
+        android:layout_height="8dp"
+        android:background="@color/greyBackground" />
 
     <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"
-            android:orientation="vertical">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:orientation="vertical">
 
 
         <!--<android.support.design.widget.TextInputLayout
@@ -99,70 +105,67 @@
                 android:textColorHint="@color/mainColor"
                 android:layout_marginLeft="20dp">-->
 
-            <EditText
-                    android:inputType="text"
-                    android:id="@+id/et_title"
-                    android:singleLine="true"
-                    android:lines="1"
-                    android:hint="제목"
-                    android:textColorHint="@color/mainColor"
-                    android:textColor="@color/mainColor"
-                    android:textSize="18sp"
-                    android:maxLength="14"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:layout_marginStart="0dp"/>
-
+        <EditText
+            android:id="@+id/et_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="0dp"
+            android:hint="제목"
+            android:inputType="text"
+            android:lines="1"
+            android:maxLength="14"
+            android:singleLine="true"
+            android:textColor="@color/mainColor"
+            android:textColorHint="@color/mainColor"
+            android:textSize="18sp" />
 
         <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                tools:text="2019.05.15 | 07:05"
-                android:text="2019.05.15 | 07:05"
-                android:layout_above="@+id/line"
-                android:layout_marginRight="8dp"
-                android:layout_marginBottom="13dp"
-                android:textSize="12dp"
-                android:textColor="@color/greyMainLineColor"
-                android:layout_alignParentRight="true"/>
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/line"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="8dp"
+            android:layout_marginBottom="13dp"
+            android:text="2019.05.15 | 07:05"
+            android:textColor="@color/greyMainLineColor"
+            android:textSize="12dp"
+            tools:text="2019.05.15 | 07:05" />
 
 
         <View
-                android:id="@+id/line"
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_below="@+id/et_title"
-                android:background="@android:color/transparent"/>
+            android:id="@+id/line"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_below="@+id/et_title"
+            android:background="@android:color/transparent" />
 
         <LinearLayout
-                android:layout_below="@+id/txtInput"
-                android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/txtInput"
+            android:layout_marginTop="50dp"
+            android:background="#ffffff"
+            android:orientation="vertical">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/txtInput2"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginTop="50dp"
-                android:background="#ffffff">
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:hint="내용을 입력해 주세요"
+                android:textColorHint="@color/greyTextColor">
 
-            <android.support.design.widget.TextInputLayout
-                    android:id="@+id/txtInput2"
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/et_content"
                     android:layout_width="match_parent"
-                    android:layout_weight="1"
-                    android:layout_height="0dp"
-                    android:hint="내용을 입력해 주세요"
-                    android:textColorHint="@color/greyTextColor">
-                <android.support.design.widget.TextInputEditText
-                        android:id="@+id/et_content"
-                        android:gravity="top"
-                        android:singleLine="false"
-                        android:textSize="14sp"
-                        android:textColor="@color/greyTextColor"
-                        android:inputType="textMultiLine|textNoSuggestions"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"/>
-            </android.support.design.widget.TextInputLayout>
+                    android:layout_height="match_parent"
+                    android:gravity="top"
+                    android:inputType="textMultiLine|textNoSuggestions"
+                    android:singleLine="false"
+                    android:textColor="@color/greyTextColor"
+                    android:textSize="14sp" />
+            </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
-
     </RelativeLayout>
-
-
 </LinearLayout>

@@ -1,83 +1,123 @@
 package com.bebediary.memo
 
-import android.content.Intent
-import android.os.AsyncTask
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
-import android.util.Log
-import android.widget.Button
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.OnLifecycleEvent
+import com.bebediary.MyApplication
 import com.bebediary.R
-import com.bebediary.memo.memodb.NoteDatabase
-import com.bebediary.memo.memodb.model.Note
+import com.bebediary.database.entity.Note
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_add_memo.*
-import java.lang.ref.WeakReference
 
-class AddNoteActivity : AppCompatActivity() {
+class AddNoteActivity : AppCompatActivity(), LifecycleObserver {
 
-    private var noteDatabase: NoteDatabase? = null
-    lateinit var note: Note
-    private var update: Boolean = false
+    // 아이 정보
+    private val babyId: Long
+        get() = intent.getLongExtra("babyId", -1L)
+
+    // 노트 정보
+    private val noteId: Long
+        get() = intent.getLongExtra("noteId", -1L)
+
+    // 노트 수정모드인지 아닌지 여부
+    private val isEdit: Boolean
+        get() = noteId != -1L
+
+    // 생성될 혹은 이미 추가되어있는 노트 정보
+    private var note: Note? = null
+
+    // Composite Disposable
+    private val compositeDisposable by lazy { CompositeDisposable() }
+
+    // Database
+    private val db by lazy { (application as MyApplication).db }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_memo)
 
-        noteDatabase = NoteDatabase.getInstance(this@AddNoteActivity)
-        val button = findViewById<Button>(R.id.save_button)
-        if (intent.getSerializableExtra("note") != null) {
-            note = intent.getSerializableExtra("note") as Note
-            update = true
-            save_button.text = "수정"
-            et_title.setText(note.title)
-            et_content.setText(note.content)
+        // 아이 정보가 넘어오지 않았을때 화면 종료
+        if (this.babyId == -1L) {
+            finish()
+            return
         }
 
-        button.setOnClickListener {
-            if (update) {
-                note.content = et_content.text.toString()
-                note.title = et_title.text.toString()
-                noteDatabase?.noteDao?.updateNote(note)
-                setResult(note, 2)
-            } else {
-                note = Note(et_content.text.toString(), et_title.text.toString())
-                InsertTask(this@AddNoteActivity, note).execute()
-            }
-        }
-
-        back_button.setOnClickListener {
-            this.finish()
-        }
+        lifecycle.addObserver(this)
     }
 
-    private fun setResult(note: Note?, flag: Int) {
-        setResult(flag, Intent().putExtra("note", note))
-        finish()
+    @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
+    fun initializeView() {
+
+        // 뒤로가기 버튼
+        back_button.setOnClickListener { finish() }
+
+        // 저장 버튼 텍스트 변경
+        save_button.text = if (isEdit) "수정" else "등록"
+
+        // 저장 버튼 클릭 리스너
+        save_button.setOnClickListener { editOrSave() }
+
+        // 수정 모드일때 FetchNote
+        if (isEdit) prefetchNote()
     }
 
-    private class InsertTask// only retain a weak reference to the activity
-    internal constructor(context: AddNoteActivity, private val note: Note) : AsyncTask<Void, Void, Boolean>() {
+    /**
+     * 수정모드일때 노트 아이디를 이용해서
+     * 기존에 작성되어있는 노트 정보를 가져와 뷰를 설정해준다
+     */
+    private fun prefetchNote() {
+        db.noteDao().getNoteById(noteId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        {
+                            this.note = it
 
-        private val activityReference: WeakReference<AddNoteActivity> = WeakReference(context)
-
-        // doInBackground methods runs on a worker thread
-        override fun doInBackground(vararg objs: Void): Boolean? {
-            // retrieve auto incremented note id
-            val j = activityReference.get()?.noteDatabase?.noteDao?.insertNote(note)
-            if (j != null) {
-                note.note_id = j
-            }
-            Log.e("ID ", "doInBackground: $j")
-            return true
-        }
-
-        // onPostExecute runs on main thread
-        override fun onPostExecute(bool: Boolean?) {
-            if (bool!!) {
-                activityReference.get()?.setResult(note, 1)
-                activityReference.get()?.finish()
-            }
-        }
+                            et_title.setText(it.title)
+                            et_content.setText(it.content)
+                        },
+                        { it.printStackTrace() }
+                )
+                .apply { compositeDisposable.add(this) }
     }
 
+    private fun editOrSave() {
+        if (et_content.text.isNullOrBlank() || et_content.text.isNullOrBlank()) {
+            Toast.makeText(this, "내용을 입력해주세요", Toast.LENGTH_SHORT).show()
+            return
+        }
 
+        if (isEdit) edit() else save()
+    }
+
+    private fun edit() {
+        val sourceNote = note ?: return
+        sourceNote.title = et_title.text.toString()
+        sourceNote.content = et_content.text.toString()
+        db.noteDao().update(sourceNote)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        { finish() },
+                        { it.printStackTrace() }
+                )
+                .apply { compositeDisposable.add(this) }
+    }
+
+    private fun save() {
+        val note = Note(title = et_title.text.toString(), content = et_content.text.toString(), babyId = babyId)
+        db.noteDao().insert(note)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        { finish() },
+                        { it.printStackTrace() }
+                )
+                .apply { compositeDisposable.add(this) }
+    }
 }

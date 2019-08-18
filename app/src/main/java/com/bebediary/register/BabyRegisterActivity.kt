@@ -11,17 +11,24 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
-import android.provider.MediaStore
-import android.support.v4.content.FileProvider
 import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.View
 import android.view.Window
 import android.widget.Toast
+import com.bebediary.MyApplication
 import com.bebediary.R
+import com.bebediary.camera.CameraWrapperActivity
+import com.bebediary.database.entity.Attachment
+import com.bebediary.database.entity.Baby
+import com.bebediary.database.entity.Sex
+import com.bebediary.util.Constants
+import com.bebediary.util.extension.toAttachment
 import com.gun0912.tedpermission.PermissionListener
 import com.gun0912.tedpermission.TedPermission
-import com.hyundeee.app.usersearch.YameTest
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_baby_register.*
 import java.io.File
 import java.io.IOException
@@ -31,18 +38,14 @@ import java.util.*
 
 class BabyRegisterActivity : Activity() {
 
-
     companion object {
-        private val PICK_FROM_ALBUM = 1
-        private val PICK_FROM_CAMERA = 2
-
         var tempFile: File? = null
     }
 
-    lateinit var imgUri: Uri
-    lateinit var photoURI: Uri
-    lateinit var contentUri: Uri
+    // Activity Result RequestCode
+    private val pickFromAlbum = 1
 
+    lateinit var imgUri: Uri
 
     lateinit var mCurrentPhotoPath: String
 
@@ -81,6 +84,15 @@ class BabyRegisterActivity : Activity() {
 
     var isPregnant: Boolean = false
 
+    // Baby 정보
+    private var photo: Attachment? = null
+
+    // Composite Disposable
+    private val compositeDisposable = CompositeDisposable()
+
+    // Database
+    private val db by lazy { (application as MyApplication).db }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestWindowFeature(Window.FEATURE_NO_TITLE)
@@ -98,16 +110,6 @@ class BabyRegisterActivity : Activity() {
         register_baby.setOnClickListener {
             saveBabyInfo()
             editor.apply()
-
-            var test = prefs.getString("album_image", null)
-            Log.d("test" , "test camera image : " + test)
-            if ( test == null || test == ""){
-                YameTest.testSubject?.onNext(imgUri)
-            } else {
-                Log.d("test" , "test album image : " + test)
-                YameTest.testSubject?.onNext(photoURI)
-            }
-            this.finish()
         }
 
         date_picker_button.setOnClickListener { datePicker() }
@@ -126,7 +128,7 @@ class BabyRegisterActivity : Activity() {
         empty_baby_image_register.setOnClickListener {
             // 권한 허용에 동의하지 않았을 경우 토스트를 띄웁니다.
             if (isPermission) {
-                showDialog()
+                showPickPhotoDialog()
             } else {
                 Toast.makeText(it.context, resources.getString(R.string.permission_2), Toast.LENGTH_LONG)
                     .show()
@@ -135,133 +137,95 @@ class BabyRegisterActivity : Activity() {
 
     }
 
-    fun showDialog() {
-        val value = arrayOf("카메라", "갤러리")
-        val alertdialogbuilder = AlertDialog.Builder(this)
-
-        alertdialogbuilder.setTitle("사진등록")
-        alertdialogbuilder.setItems(
-            value
-        ) { _, id ->
-            if (id == 0) {
-                takePhoto()
-            } else {
-                goToAlbum()
+    /**
+     * 사진 선택 다이얼로그
+     */
+    private fun showPickPhotoDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("사진등록")
+            .setItems(arrayOf("카메라", "갤러리")) { _, id ->
+                if (id == 0) takePhoto() else goToAlbum()
             }
-        }
-        val dialog = alertdialogbuilder.create()
-        dialog.show()
+            .show()
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
 
-        if (resultCode !== RESULT_OK) {
-            tempFile?.run {
-                if (tempFile!!.exists()) {
-                    if (tempFile!!.delete()) {
-                        //Log.e(TAG, tempFile.getAbsolutePath() + " 삭제 성공")
-                        tempFile = null
-                    }
-                }
+    /**
+     * 유저가 카메라나 갤러리 이미지 선택했을때
+     */
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
+        if (resultCode != RESULT_OK) {
+            if (tempFile?.exists() == true && tempFile?.delete() == true) {
+                tempFile = null
             }
             return
         }
 
-        if (requestCode == PICK_FROM_ALBUM) {
-            if (data != null) {
-                if (data.data != null) {
-                    try {
-                        var albumFile: File? = null
-                        albumFile = createImageFile()
-                        photoURI = data.data
-                        imgUri = Uri.fromFile(albumFile)
-                        galleryAddPick()
-                        empty_baby_image_register.visibility = View.GONE
-                        baby_image.visibility = View.VISIBLE
-                        baby_image_layout.visibility = View.VISIBLE
-                        baby_image.setImageURI(photoURI)
-                        baby_image.invalidate()
+        // 이미지 선택 URI
+        val attachment = when (requestCode) {
+            pickFromAlbum ->
+                data.data?.toAttachment(this) // 앨범에서 이미지를 선택했을경우
+            Constants.requestCameraCode -> {
+                File(data.getStringExtra("imagePath")).toAttachment(this) // 카메라 촬영으로 이미지를 가져왔을 경우
 
-                        editor.putString("album_image", photoURI.toString())
-
-                        //YameTest.testSubject?.onNext(photoURI)
-
-                        //cropImage();
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        Log.v("알림", "앨범에서 가져오기 에러")
-                    }
-                }
             }
-        } else if (requestCode == PICK_FROM_CAMERA) {
-            try {
-                Log.v("알림", "FROM_CAMERA 처리")
-                galleryAddPick()
-                empty_baby_image_register.visibility = View.GONE
-                baby_image.visibility = View.VISIBLE
-                baby_image_layout.visibility = View.VISIBLE
-                baby_image.setImageURI(imgUri)
+            else -> null
+        } ?: return
 
-                editor.putString("image", imgUri.toString())
-
-                //YameTest.testSubject?.onNext(imgUri)
-
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-
-        }
+        // 이미지 저장 및 설정
+        val attachmentDao = db.attachmentDao()
+        attachment
+            .flatMap { attachmentDao.insert(it) }
+            .flatMap { id -> db.attachmentDao().getById(id) }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                { invalidatePhotoView(it) },
+                { it.printStackTrace() }
+            )
+            .apply { compositeDisposable.add(this) }
     }
 
-
-    fun galleryAddPick() {
-
-        val mediaScanIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
-        val f = File(mCurrentPhotoPath)
-        contentUri = Uri.fromFile(f)
-        mediaScanIntent.data = contentUri
-        sendBroadcast(mediaScanIntent)
-        Toast.makeText(this, "사진이 저장되었습니다", Toast.LENGTH_SHORT).show()
-    }
-
+    /**
+     * 사진 앨벙 선택
+     */
     private fun goToAlbum() {
-        //특정 경로
-        //https://straight-strange.tistory.com/16
-        val intent = Intent(Intent.ACTION_PICK)
-        intent.type = MediaStore.Images.Media.CONTENT_TYPE
-        intent.type = "image/*"
-        startActivityForResult(intent, PICK_FROM_ALBUM)
+        val intent = Intent(Intent.ACTION_PICK).apply { type = "image/*" }
+        startActivityForResult(intent, pickFromAlbum)
     }
 
+    /**
+     * 사진 촬영 요청
+     */
     private fun takePhoto() {
-        val state = Environment.getExternalStorageState()
-        if (Environment.MEDIA_MOUNTED.equals(state)) {
-            val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-            if (intent.resolveActivity(packageManager) != null) {
-                var photoFile: File? = null
-                try {
-                    photoFile = createImageFile()
-                } catch (e: IOException) {
-                    e.printStackTrace()
-                }
-                if (photoFile != null) {
+        val intent = Intent(this, CameraWrapperActivity::class.java)
+        startActivityForResult(intent, Constants.requestCameraCode)
+    }
 
-                    val providerURI = FileProvider.getUriForFile(this, packageName.plus(".provider"), photoFile)
-                    imgUri = providerURI
-                    intent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, providerURI)
-                    startActivityForResult(intent, PICK_FROM_CAMERA)
-                }
-            }
-        } else {
-            Log.v("알림", "저장공간에 접근 불가능")
-            return
-        }
+    /**
+     * Attachment 데이터를 넘겨받아 유저의 이미지뷰를 업데이트한다
+     */
+    private fun invalidatePhotoView(attachment: Attachment) {
+
+        // 아이 정보 업데이트
+        photo = attachment
+
+        // View 업데이트
+        empty_baby_image_register.isVisible = false
+        baby_image.isVisible = true
+        baby_image_layout.isVisible = true
+
+        // 이미지 로딩
+        GlideApp.with(this)
+            .load(attachment.file)
+            .centerCrop()
+            .circleCrop()
+            .into(baby_image)
     }
 
     @Throws(IOException::class)
     private fun createImageFile(): File {
-        var timeStamp = SimpleDateFormat("yyyyMMdd - HH:mm:ss").format(Date())
-
+        val timeStamp = SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault()).format(Date())
         val imgFileName = "bebe_$timeStamp.jpg"
         var imageFile: File? = null
         val storageDir = File(Environment.getExternalStorageDirectory().toString() + "/Bebe")
@@ -275,52 +239,75 @@ class BabyRegisterActivity : Activity() {
         return imageFile
     }
 
+    /**
+     * 스토리지 권한 설정
+     */
     private fun tedPermission() {
-        val permissionListener = object : PermissionListener {
-            override fun onPermissionGranted() {
-                // 권한 요청 성공
-                isPermission = true
-            }
-
-            override fun onPermissionDenied(deniedPermissions: ArrayList<String>) {
-                // 권한 요청 실패
-                isPermission = false
-            }
-        }
-
         TedPermission.with(this)
-            .setPermissionListener(permissionListener)
+            .setPermissionListener(object : PermissionListener {
+                override fun onPermissionGranted() {
+                    // 권한 요청 성공
+                    isPermission = true
+                }
+
+                override fun onPermissionDenied(deniedPermissions: ArrayList<String>) {
+                    // 권한 요청 실패
+                    isPermission = false
+                }
+            })
             .setRationaleMessage(resources.getString(R.string.permission_2))
             .setDeniedMessage(resources.getString(R.string.permission_1))
             .setPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA)
             .check()
     }
 
-    // 이름, 성별, 몇일
-    fun saveBabyInfo() {
-        if (baby_name.text.toString() != "" || baby_name.text.toString() != null) {
-            editor.apply {
-                putString("baby_name", baby_name.text.toString())
-                apply()
-            }
-        }
-        Log.d("test", "EditText nane : " + baby_name.text.toString())
+    /**
+     * 아이 정보 데이터 베이스에 저장
+     */
+    private fun saveBabyInfo() {
 
-        if (baby_gender.text.toString() != "" || baby_gender.text.toString() != null) {
-            editor.apply {
-                putString("baby_gender", baby_gender.text.toString())
-                apply()
-            }
+        // 이름 입력 여부 확인
+        if (baby_name.text.isNullOrBlank()) {
+            Toast.makeText(this, "이름을 입력해주세요", Toast.LENGTH_SHORT).show()
+            return
         }
 
-        //알람 몇일 전 ? 저장 ( 라이디오 버튼 값 )
+        // 성별 선택 여부 확인
+        if (!babyRegisterMale.isChecked && !babyRegisterFeMale.isChecked) {
+            Toast.makeText(this, "성별을 선택해주세요", Toast.LENGTH_SHORT).show()
+            return
+        }
 
+        // 사진 선택
+        if (photo == null) {
+            Toast.makeText(this, "사진을 선택해주세요", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // 아이 정보 생성
+        val baby = Baby(
+            name = baby_name.text.toString(),
+            sex = if (babyRegisterMale.isChecked) Sex.Male else Sex.Female,
+            photoId = photo?.id ?: throw IllegalStateException("사진 아이디가 존재하지 않습니다")
+        )
+
+        // 데이터 입력
+        db.babyDao().insert(baby)
+            .subscribeOn(Schedulers.io())
+            .subscribe(
+                { finish() },
+                {
+                    Toast.makeText(this, "아이 데이터 생성에 실패하였습니다", Toast.LENGTH_SHORT).show()
+                    it.printStackTrace()
+                }
+            )
+            .apply { compositeDisposable.add(this) }
     }
 
-    fun setPregnantStatus() {
+    private fun setPregnantStatus() {
         var check = false
         isPregnant = prefs.getBoolean("pregnant_status", false)
-        if (isPregnant){
+        if (isPregnant) {
             //임신중
             pregnant_on_off.setBackgroundResource(R.drawable.pregnant_on)
             birthday_text.text = "출산 예정일"
@@ -359,7 +346,7 @@ class BabyRegisterActivity : Activity() {
         }
     }
 
-    fun datePicker() {
+    private fun datePicker() {
         val calendar = Calendar.getInstance()
         val year = calendar.get(Calendar.YEAR)
         val month = calendar.get(Calendar.MONTH)
