@@ -54,7 +54,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         // 아이가 선택되어 있어야만 아래의 모든 작업을 할 수 있으므로 아이가 선택되어있지 않으면 리턴
         val babyId = currentBabyModel?.baby?.id
-                ?: return@OnNavigationItemSelectedListener false
+            ?: return@OnNavigationItemSelectedListener false
 
         val transaction = fragmentManager.beginTransaction()
         when (item.itemId) {
@@ -119,25 +119,25 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun fetchCurrentBaby() {
         db.babyDao().getSelected()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        {
-                            // Drawer에 아이 정보 업데이트
-                            invalidateNavigationHeader(it)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                {
+                    // Drawer에 아이 정보 업데이트
+                    invalidateNavigationHeader(it)
 
-                            // 아이 뷰 업데이트
-                            invalidateBabyView(it)
+                    // 아이 뷰 업데이트
+                    invalidateBabyView(it)
 
-                            // 멤버 변수로 저장
-                            currentBabyModel = it
+                    // 멤버 변수로 저장
+                    currentBabyModel = it
 
-                            // Logging
-                            Log.d("Main", "현재 선택된 아이 : $it")
-                        },
-                        { it.printStackTrace() }
-                )
-                .apply { compositeDisposable.add(this) }
+                    // Logging
+                    Log.d("Main", "현재 선택된 아이 : $it")
+                },
+                { it.printStackTrace() }
+            )
+            .apply { compositeDisposable.add(this) }
     }
 
     /**
@@ -153,6 +153,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
             // 태그 업데이트
             it.tag = isOpen.not()
+        }
+
+        // 홈 버튼 눌렀을때 홈화면으로 이동
+        go_to_home.setOnClickListener {
+            main_all_Scrollview.isVisible = true
+            frame_layout.isVisible = false
         }
     }
 
@@ -179,9 +185,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         // 사진 설정
         real_baby_image.isVisible = true
         GlideApp.with(real_baby_image)
-                .load(babyModel.photos.first().file)
-                .centerCrop()
-                .into(real_baby_image)
+            .load(babyModel.photos.first().file)
+            .centerCrop()
+            .into(real_baby_image)
     }
 
     /**
@@ -189,10 +195,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
      */
     private fun invalidateNavigationHeader(babyModel: BabyModel) {
         GlideApp.with(navigationHeaderImage)
-                .load(babyModel.photos.first().file)
-                .centerCrop()
-                .circleCrop()
-                .into(navigationHeaderImage)
+            .load(babyModel.photos.first().file)
+            .centerCrop()
+            .circleCrop()
+            .into(navigationHeaderImage)
 
         // 이름 설정
         navigationHeaderName.text = babyModel.baby.name
