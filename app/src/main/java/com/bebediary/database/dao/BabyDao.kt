@@ -19,7 +19,7 @@ interface BabyDao : BaseDao<Baby> {
     fun getById(id: Long): Maybe<BabyModel>
 
     @Query("SELECT * FROM baby  WHERE isSelected = 1 LIMIT 1")
-    fun getSelected(): Observable<BabyModel>
+    fun getSelected(): Flowable<BabyModel>
 
     @Query("UPDATE baby SET isSelected = id == :babyId")
     fun select(babyId: Long): Completable

@@ -10,4 +10,5 @@ final public class Constants {
 
     // Request Codes
     public static int requestCameraCode = 0x0101;
+    public static int requestAlbumCode = 0x0102;
 }

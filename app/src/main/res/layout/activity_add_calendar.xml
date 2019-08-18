@@ -1,183 +1,211 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:background="@color/greyBackground">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/greyBackground"
+    android:orientation="vertical">
 
     <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar_top"
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            android:minHeight="?attr/actionBarSize"
-            android:background="#ffffff"
-            app:theme="@style/Widget.AppCompat.Toolbar">
+        android:id="@+id/toolbar_top"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#ffffff"
+        android:minHeight="?attr/actionBarSize"
+        app:theme="@style/Widget.AppCompat.Toolbar">
+
         <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerVertical="true"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"
                 android:orientation="horizontal">
 
-            <LinearLayout
+                <ImageButton
+                    android:id="@+id/back_button"
+                    android:layout_width="38dp"
+                    android:layout_height="38dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginRight="5dp"
+                    android:background="@drawable/ic_arrow_back"
+                    android:clickable="true"
+                    android:gravity="center_vertical" />
+
+                <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_centerVertical="true"
-                    android:layout_alignParentStart="true">
-                <ImageButton
-                        android:id="@+id/back_button"
-                        android:layout_width="38dp"
-                        android:layout_height="38dp"
-                        android:gravity="center_vertical"
-                        android:layout_marginRight="5dp"
-                        android:layout_gravity="center_vertical"
-                        android:clickable="true"
-                        android:background="@drawable/ic_arrow_back"/>
-                <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="일일 기록"
-                        android:textSize="20sp"
-                        android:gravity="center|center_vertical"
-                        android:layout_gravity="center|center_horizontal"
-                        android:textColor="@color/registerPopupTextColor"/>
+                    android:layout_gravity="center|center_horizontal"
+                    android:gravity="center|center_vertical"
+                    android:text="일일 기록"
+                    android:textColor="@color/registerPopupTextColor"
+                    android:textSize="20sp" />
 
             </LinearLayout>
 
 
             <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical|end"
-                    android:layout_alignParentEnd="true"
-                    android:layout_marginTop="0dp"
-                    android:layout_alignParentTop="true"
-                    android:padding="10dp">
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="0dp"
+                android:gravity="center_vertical|end"
+                android:orientation="horizontal"
+                android:padding="10dp">
 
                 <Button
-                        android:id="@+id/add_calendar_button"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:background="@android:color/transparent"
-                        android:textColor="@color/registerPopupTextColor"
-                        android:text="저장"
-                        android:layout_marginRight="5dp"/>
+                    android:id="@+id/addCalendarSave"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_marginRight="5dp"
+                    android:background="@android:color/transparent"
+                    android:foreground="?attr/selectableItemBackgroundBorderless"
+                    android:text="저장"
+                    android:textColor="@color/registerPopupTextColor" />
 
                 <View
-                        android:layout_width="1dp"
-                        android:layout_height="10dp"
-                        android:background="@color/registerPopupTextColor"
-                />
+                    android:layout_width="1dp"
+                    android:layout_height="10dp"
+                    android:background="@color/registerPopupTextColor" />
+
                 <Button
-                        android:id="@+id/delete_calendar_button"
-                        android:layout_width="35dp"
-                        android:layout_height="35dp"
-                        android:clickable="true"
-                        android:layout_marginLeft="5dp"
-                        android:background="@android:color/transparent"
-                        android:textColor="@color/registerPopupTextColor"
-                        android:text="삭제"/>
+                    android:id="@+id/delete_calendar_button"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:layout_marginLeft="5dp"
+                    android:background="@android:color/transparent"
+                    android:clickable="true"
+                    android:text="삭제"
+                    android:textColor="@color/registerPopupTextColor" />
             </LinearLayout>
         </RelativeLayout>
 
     </androidx.appcompat.widget.Toolbar>
 
     <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="20dp"
-            android:orientation="horizontal">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="16dp"
+        android:baselineAligned="false"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:weightSum="2">
 
         <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:background="@drawable/round_bg"
+            android:gravity="center_vertical|center"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/addCalendarDateView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/round_bg"
-                android:layout_marginRight="15dp"
-                android:layout_gravity="center"
-                android:gravity="center_vertical|center"
-                android:orientation="horizontal">
-            <TextView
-                    android:id="@+id/baby_birthday"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="16sp"
-                    tools:text="2019.09.29"
-                    android:text="2019.09.29"
-                    android:gravity="center_horizontal|center"
-                    android:layout_gravity="center|center_vertical"
-                    android:layout_marginRight="8dp"
-                    android:textColor="@color/registerPopupTextColor"
-            />
+                android:layout_gravity="center|center_vertical"
+                android:layout_marginEnd="8dp"
+                android:gravity="center_horizontal|center"
+                android:textColor="@color/registerPopupTextColor"
+                android:textSize="16sp"
+                tools:text="2019.09.29" />
 
             <ImageView
-                    android:id="@+id/date_picker_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="6dp"
-                    android:layout_gravity="center|center_vertical"
-                    android:background="@drawable/date_picker_button"/>
-
+                android:id="@+id/date_picker_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center|center_vertical"
+                android:layout_marginLeft="6dp"
+                android:background="@drawable/date_picker_button" />
         </LinearLayout>
 
         <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/round_bg"
-                android:gravity="center_vertical|center"
-                android:orientation="horizontal">
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:background="@drawable/round_bg"
+            android:gravity="center_vertical|center"
+            android:orientation="horizontal">
 
             <ImageButton
-                    android:id="@+id/noti_icon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:clickable="true"
-                    android:background="@drawable/noti_icon_off"/>
-
+                android:id="@+id/addCalendarNotificationView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="true"
+                android:src="@drawable/noti_icon_off"
+                app:backgroundTint="@android:color/transparent" />
         </LinearLayout>
     </LinearLayout>
 
     <LinearLayout
-            android:layout_below="@+id/txtInput"
-            android:orientation="vertical"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:gravity="center_vertical|center"
-            android:layout_gravity="center"
-            android:background="@drawable/text_bg">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/text_bg"
+        android:gravity="center_vertical|center"
+        android:orientation="vertical">
 
         <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/txtInput2"
-                android:layout_width="match_parent"
-                android:layout_weight="1"
-                android:layout_height="0dp"
-                android:padding="15dp"
-                android:hint="내용을 입력해 주세요"
-                android:textColorHint="@color/greyTextColor">
+            android:id="@+id/txtInput2"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:hint="내용을 입력해 주세요"
+            android:padding="15dp"
+            android:textColorHint="@color/greyTextColor">
+
             <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/et_content"
-                    android:gravity="top"
-                    android:singleLine="false"
-                    android:textSize="14sp"
-                    android:textColor="@color/greyTextColor"
-                    android:inputType="textMultiLine|textNoSuggestions"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"/>
+                android:id="@+id/addCalendarContent"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="top"
+                android:inputType="textMultiLine|textNoSuggestions"
+                android:singleLine="false"
+                android:textColor="@color/greyTextColor"
+                android:textSize="14sp" />
         </com.google.android.material.textfield.TextInputLayout>
 
     </LinearLayout>
 
     <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="20dp"
-            android:background="@drawable/add_image"/>
+        android:id="@+id/addCalendarAddAttachment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:background="@android:color/transparent"
+        android:foreground="?attr/selectableItemBackgroundBorderless"
+        android:scaleType="centerInside"
+        android:src="@drawable/add_image" />
 
-
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/addCalendarAttachmentRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        tools:itemCount="100"
+        tools:listitem="@layout/item_add_calendar_attachment" />
 </LinearLayout>
