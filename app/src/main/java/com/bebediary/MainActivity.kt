@@ -40,6 +40,10 @@ import kotlinx.android.synthetic.main.header_navigatioin.*
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, LifecycleObserver, IncomingDiaryAdapter.OnItemChangeListener {
 
+    // 아이 정보
+    private val babyId: Long
+        get() = intent.getLongExtra("babyId", -1L)
+
     lateinit var drawerToggle: ActionBarDrawerToggle
 
     // Composite Disposable
@@ -156,6 +160,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         prefs = getSharedPreferences("baby_info", Context.MODE_PRIVATE)
         editor = prefs.edit()
+
+        // Add Observer
+        lifecycle.addObserver(this)
 
         babyInfoSetting()
 
@@ -405,5 +412,36 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
 
         return false
+    }
+
+    /**
+     * 아이 정보 요청
+     */
+    @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
+    fun fetchBaby() {
+        db.babyDao().getById(babyId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        { invalidateBabyWatermark(it) },
+                        { it.printStackTrace() }
+                )
+                .apply { compositeDisposable.add(this) }
+    }
+
+    /**
+     * 아이 정보를 가져와서 하단 워터마크 업데이트
+     */
+    private fun invalidateBabyWatermark(babyModel: BabyModel) {
+
+        // 아이 이름 설정
+        BabyNameView.text = babyModel.baby.name
+
+        // 생일 뷰 설정
+        BabyBirthView.text = "2019.09.09"
+
+        // 아이 설명 뷰 설정
+        BabyDescriptionView.text = "만 1세 5개월 (142)일\n태어난지 507일"
+
     }
 }
