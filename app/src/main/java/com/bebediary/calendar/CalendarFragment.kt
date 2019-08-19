@@ -15,6 +15,7 @@ import com.bebediary.calendar.decorator.DiaryDecorator
 import com.bebediary.calendar.decorator.OneDayDecorator
 import com.bebediary.calendar.decorator.SaturdayDecorator
 import com.bebediary.calendar.decorator.SundayDecorator
+import com.bebediary.calendar.list.CalendarListActivity
 import com.bebediary.database.model.BabyModel
 import com.bebediary.database.model.DiaryModel
 import com.prolificinteractive.materialcalendarview.CalendarDay
@@ -55,6 +56,14 @@ class CalendarFragment : Fragment(), LifecycleObserver, OnDateSelectedListener {
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun initializeView() {
         val view = view ?: return
+
+        // 캘린더 리스트로 이동하
+        view.calendarMoveToList.setOnClickListener {
+            val babyModel = currentBabyModel ?: return@setOnClickListener
+            val intent = Intent(requireContext(), CalendarListActivity::class.java)
+                    .putExtra("babyId", babyModel.baby.id)
+            startActivity(intent)
+        }
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)

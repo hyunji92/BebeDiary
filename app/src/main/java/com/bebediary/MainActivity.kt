@@ -37,6 +37,7 @@ import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.contents_main.*
 import kotlinx.android.synthetic.main.header_navigatioin.*
+import java.util.*
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, LifecycleObserver, IncomingDiaryAdapter.OnItemChangeListener {
 
@@ -268,8 +269,21 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         // Dispose Diary Disposable
         fetchDiaryDisposable?.dispose()
 
-        // 다이어리 리스트 요청
-        fetchDiaryDisposable = db.diaryDao().getBabyDiaries(babyModel.baby.id)
+        // 오늘 부터 10일 이후까지
+        val startedAt = Calendar.getInstance().apply {
+            set(Calendar.HOUR, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+        val endedAt = Calendar.getInstance().apply {
+            time = startedAt.time
+            add(Calendar.DAY_OF_MONTH, 10)
+        }
+
+        // 최근 일정 다이어리 리스트 요청
+        fetchDiaryDisposable = db.diaryDao()
+                .getDiaryByDateRange(babyModel.baby.id, startedAt.timeInMillis, endedAt.timeInMillis)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(

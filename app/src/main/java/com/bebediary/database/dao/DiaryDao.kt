@@ -18,4 +18,7 @@ interface DiaryDao : BaseDao<Diary> {
 
     @Query("SELECT * FROM diary WHERE babyId = :babyId and date BETWEEN :startDateTimeInMillis AND :endDateTimeInMillis")
     fun getDiaryByDate(babyId: Long, startDateTimeInMillis: Long, endDateTimeInMillis: Long): Maybe<DiaryModel>
+
+    @Query("SELECT * FROM diary WHERE babyId = :babyId and date BETWEEN :startDateTimeInMillis AND :endDateTimeInMillis")
+    fun getDiaryByDateRange(babyId: Long, startDateTimeInMillis: Long, endDateTimeInMillis: Long): Flowable<List<DiaryModel>>
 }
