@@ -20,6 +20,9 @@ data class Baby(
         @ColumnInfo(name = "name") val name: String,
         @ColumnInfo(name = "sex") val sex: Sex,
         @ColumnInfo(name = "isSelected") var isSelected: Boolean = false,
+        @ColumnInfo(name = "isPregnant") var isPregnant: Boolean = false,
+        @ColumnInfo(name = "birthday") var birthday: Date? = null,
+        @ColumnInfo(name = "babyDueDate") var babyDueDate: Date? = null,
         @ColumnInfo(name = "photoId") val photoId: Long? = null,
         @ColumnInfo(name = "createdAt") val createdAt: Date = Date()
 )
