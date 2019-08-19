@@ -36,6 +36,7 @@
         <activity android:name=".baby.change.BabyChangeActivity" />
         <activity android:name=".camera.CameraWrapperActivity" />
         <activity android:name=".camera.CameraResultActivity" />
+        <activity android:name=".whitenoise.WhiteNoiseActivity"/>
 
         <!-- 사진 촬영을 위한 provide -->
         <provider

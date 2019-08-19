@@ -28,6 +28,7 @@ import com.bebediary.main.adapter.IncomingDiaryAdapter
 import com.bebediary.memo.NoteListActivity
 import com.bebediary.register.BabyRegisterActivity
 import com.bebediary.util.Constants
+import com.bebediary.whitenoise.WhiteNoiseActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationView
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -147,6 +148,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             setOnNavigationItemSelectedListener(onNavigationItemSelectedListener)
         }
 
+
+
         drawerToggle = ActionBarDrawerToggle(
             this,
             dl_main_drawer_root,
@@ -220,6 +223,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         go_to_home.setOnClickListener {
             main_all_Scrollview.isVisible = true
             frame_layout.isVisible = false
+        }
+
+        white_nois.setOnClickListener {
+            val intent = Intent(this, WhiteNoiseActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK and Intent.FLAG_ACTIVITY_CLEAR_TASK and Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            startActivity(intent)
         }
 
         // RecyclerView Adapter
