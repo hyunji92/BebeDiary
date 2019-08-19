@@ -6,7 +6,6 @@ import com.bebediary.database.entity.Diary
 import com.bebediary.database.model.DiaryModel
 import io.reactivex.Flowable
 import io.reactivex.Maybe
-import io.reactivex.Single
 
 @Dao
 interface DiaryDao : BaseDao<Diary> {
@@ -18,5 +17,5 @@ interface DiaryDao : BaseDao<Diary> {
     fun getIncomingBabyDiaries(babyId: Long): Flowable<List<DiaryModel>>
 
     @Query("SELECT * FROM diary WHERE babyId = :babyId and date BETWEEN :startDateTimeInMillis AND :endDateTimeInMillis")
-    fun getDiaryByDate(babyId: Long, startDateTimeInMillis: Long, endDateTimeInMillis: Long): Single<DiaryModel>
+    fun getDiaryByDate(babyId: Long, startDateTimeInMillis: Long, endDateTimeInMillis: Long): Maybe<DiaryModel>
 }
