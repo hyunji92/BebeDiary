@@ -148,8 +148,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             setOnNavigationItemSelectedListener(onNavigationItemSelectedListener)
         }
 
-
-
         drawerToggle = ActionBarDrawerToggle(
             this,
             dl_main_drawer_root,
@@ -225,6 +223,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             frame_layout.isVisible = false
         }
 
+        // 백색 소음 화면으로 이동
         white_nois.setOnClickListener {
             val intent = Intent(this, WhiteNoiseActivity::class.java)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK and Intent.FLAG_ACTIVITY_CLEAR_TASK and Intent.FLAG_ACTIVITY_CLEAR_TOP)
