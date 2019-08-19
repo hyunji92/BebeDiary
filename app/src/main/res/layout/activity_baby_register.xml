@@ -9,7 +9,7 @@
 
     <LinearLayout
         android:layout_width="320dp"
-        android:layout_height="580dp"
+        android:layout_height="500dp"
         android:background="@drawable/add_baby_popup_background"
         android:orientation="vertical">
 
@@ -22,7 +22,6 @@
             android:layout_marginRight="26dp">
 
             //나가기
-
             <ImageButton
                 android:id="@+id/register_exit"
                 android:layout_width="wrap_content"
@@ -186,7 +185,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center|center_horizontal"
-                    android:layout_marginRight="5dp"
+                    android:layout_marginRight="15dp"
                     android:text="생일"
                     android:textColor="#000000"
                     android:textSize="18sp"
@@ -277,70 +276,6 @@
                         android:buttonTint="@color/colorPrimary"
                         android:text="남자" />
                 </RadioGroup>
-            </LinearLayout>
-
-            //일정 알림
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom"
-                android:layout_marginTop="8dp"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginRight="5dp"
-                    android:text="일정알림"
-                    android:textColor="@color/registerPopupTextColor"
-                    android:textSize="14sp" />
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:maxLength="6"
-                        android:textColor="@color/registerPopupTextColor"
-                        android:textSize="16sp"
-                        tools:text="1 + 일전" />
-
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/day_line" />
-                </LinearLayout>
-            </LinearLayout>
-
-            //지난 일정 보기
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom"
-                android:layout_marginTop="8dp"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginRight="8dp"
-                    android:text="지난 일정 보기 "
-                    android:textColor="@color/registerPopupTextColor"
-                    android:textSize="14sp" />
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:background="@drawable/check_day_before" />
             </LinearLayout>
         </LinearLayout>
 
