@@ -44,7 +44,7 @@ class IncomingDiaryAdapter(
             }
 
         init {
-            itemView.itemMainIncomingDiaryCheckbox.setOnCheckedChangeListener { buttonView, isChecked ->
+            itemView.itemMainIncomingDiaryCheckbox.setOnCheckedChangeListener { _, isChecked ->
                 val item = item ?: return@setOnCheckedChangeListener
                 onItemChangeListener.onChangeDiaryComplete(item, isChecked)
             }
