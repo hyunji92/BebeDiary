@@ -1,345 +1,449 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:app="http://schemas.android.com/apk/res-auto"
-	xmlns:tools="http://schemas.android.com/tools"
-	android:id="@+id/container"
-	android:layout_width="match_parent"
-	android:layout_height="match_parent"
-	android:background="#efefef">
-	
-	<!-- toolbar -->
-	<androidx.appcompat.widget.Toolbar
-		android:id="@+id/toolbar"
-		android:layout_width="match_parent"
-		android:layout_height="?attr/actionBarSize"
-		android:background="#ffffff"
-		android:theme="?attr/actionBarTheme"
-		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toTopOf="parent">
-		
-		<RelativeLayout
-			android:layout_width="match_parent"
-			android:layout_height="match_parent"
-			android:orientation="horizontal">
-			
-			<ImageView
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:layout_centerVertical="true"
-				android:layout_marginStart="85dp"
-				android:layout_marginTop="100dp"
-				android:layout_marginBottom="100dp"
-				android:background="@drawable/logo_mint" />
-			
-			<LinearLayout
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:layout_alignParentRight="true"
-				android:layout_centerVertical="true"
-				android:gravity="center_vertical"
-				android:orientation="horizontal">
-				
-				<ImageButton
-					android:id="@+id/sound"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:layout_gravity="center_vertical"
-					android:layout_marginRight="10dp"
-					android:background="@drawable/music_button" />
-				
-				
-				<ImageButton
-					android:id="@+id/go_to_home"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:layout_gravity="center_vertical"
-					android:layout_marginRight="10dp"
-					android:background="@drawable/home_button" />
-			
-			
-			</LinearLayout>
-		
-		</RelativeLayout>
-	
-	</androidx.appcompat.widget.Toolbar>
-	
-	<FrameLayout
-		android:id="@+id/frame_layout"
-		android:layout_width="match_parent"
-		android:layout_height="0dp"
-		android:visibility="gone"
-		app:layout_constraintBottom_toTopOf="@+id/nav_view"
-		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@+id/toolbar" />
-	
-	<ScrollView
-		android:id="@+id/main_all_Scrollview"
-		android:layout_width="match_parent"
-		android:layout_height="0dp"
-		android:visibility="visible"
-		app:layout_constraintBottom_toTopOf="@+id/nav_view"
-		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@+id/toolbar">
-		
-		<!-- scrollView 밑에 부모뷰 -->
-		<LinearLayout
-			android:layout_width="match_parent"
-			android:layout_height="match_parent"
-			android:orientation="vertical">
-			
-			<!-- 아기를 추가해 주세요.(맨처음, 보이고 안보인다) -->
-			<LinearLayout
-				android:id="@+id/first_add_baby_layout"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:layout_gravity="center"
-				android:layout_marginTop="100dp"
-				android:orientation="vertical"
-				android:visibility="gone"
-				tools:visibility="visible">
-				
-				<ImageButton
-					android:id="@+id/add_baby"
-					android:layout_width="300dp"
-					android:layout_height="250dp"
-					android:background="@drawable/baby_empty" />
-			</LinearLayout>
-			
-			
-			<!--- 아가 사진 섹션/메인 사진 -->
-			<FrameLayout
-				android:id="@+id/main_baby_layout"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content">
-				
-				// 아가 사진 없을 때, 등록하세요
-				// 아기 사진 없이 등록했을 때 보이는거
-				// 보여야 하는거
-				
-				<LinearLayout
-					android:id="@+id/no_register_baby_image_layout"
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					android:layout_marginTop="40dp"
-					android:orientation="vertical"
-					android:visibility="gone"
-					tools:visibility="gone">
-					
-					<ImageButton
-						android:layout_width="wrap_content"
-						android:layout_height="wrap_content"
-						android:layout_gravity="center_horizontal|center"
-						android:background="@drawable/add_baby_image"
-						android:gravity="center|center_horizontal" />
-					
-					<TextView
-						android:layout_width="wrap_content"
-						android:layout_height="wrap_content"
-						android:layout_gravity="center_horizontal|center"
-						android:layout_marginTop="10dp"
-						android:gravity="center|center_horizontal"
-						android:text="사진을 등록해주세요!"
-						android:textColor="@color/greyMainTextColor"
-						android:textSize="32sp" />
-				
-				</LinearLayout>
-				// 리얼 사진, 사진 있으면 보여야 하는거
-				// 보여야 하는거
-				
-				<ImageView
-					android:id="@+id/real_baby_image"
-					android:layout_width="match_parent"
-					android:layout_height="315dp"
-					android:scaleType="centerCrop"
-					android:visibility="gone"
-					tools:background="@drawable/test_image" />
-				
-				<ImageButton
-					android:id="@+id/main_image_off_button"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:layout_gravity="right"
-					android:layout_marginTop="20dp"
-					android:layout_marginRight="15dp"
-					android:layout_marginBottom="15dp"
-					android:background="@drawable/main_image_on" />
-			
-			</FrameLayout>
-			
-			<!-- main top -->
-			<LinearLayout
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:orientation="vertical">
-				
-				<LinearLayout
-					android:id="@+id/main_top_layout"
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					android:background="@drawable/main_top_layout"
-					android:orientation="vertical"
-					android:visibility="gone"
-					tools:visibility="visible">
-					
-					<LinearLayout
-						android:layout_width="wrap_content"
-						android:layout_height="wrap_content"
-						android:layout_gravity="right"
-						android:layout_marginTop="18dp"
-						android:layout_marginRight="50dp"
-						android:gravity="center_vertical"
-						android:orientation="horizontal">
-						
-						<androidx.appcompat.widget.AppCompatTextView
-							android:id="@+id/BabyNameView"
-							android:layout_width="wrap_content"
-							android:layout_height="wrap_content"
-							android:textColor="@android:color/white"
-							android:textSize="24sp"
-							android:textStyle="bold"
-							app:autoSizeMinTextSize="12sp"
-							app:autoSizeTextType="uniform"
-							tools:text="동동이" />
-						
-						<androidx.appcompat.widget.AppCompatImageView
-							android:layout_width="wrap_content"
-							android:layout_height="wrap_content"
-							android:layout_gravity="bottom"
-							android:layout_marginStart="4dp"
-							app:srcCompat="@drawable/noti_icon" />
-						
-						<androidx.appcompat.widget.AppCompatTextView
-							android:id="@+id/BabyBirthView"
-							android:layout_width="wrap_content"
-							android:layout_height="wrap_content"
-							android:layout_gravity="bottom"
-							android:layout_marginStart="8dp"
-							android:textColor="@android:color/white"
-							android:textSize="12sp"
-							tools:text="@tools:sample/date/ddmmyy" />
-					</LinearLayout>
-					
-					<LinearLayout
-						android:layout_width="200dp"
-						android:layout_height="wrap_content"
-						android:layout_gravity="right"
-						android:layout_marginTop="4dp"
-						android:layout_marginBottom="4dp"
-						android:orientation="vertical">
-						
-						<androidx.appcompat.widget.AppCompatTextView
-							android:id="@+id/BabyDescriptionView"
-							android:layout_width="wrap_content"
-							android:layout_height="wrap_content"
-							android:lineSpacingExtra="-4sp"
-							android:textColor="@android:color/white"
-							android:textSize="13sp"
-							tools:maxLines="2"
-							tools:text="@tools:sample/lorem/random" />
-					</LinearLayout>
-					
-					<FrameLayout
-						android:layout_width="wrap_content"
-						android:layout_height="wrap_content"
-						android:layout_gravity="right"
-						android:layout_marginRight="10dp"
-						android:layout_marginBottom="5dp"
-						android:background="@drawable/dust">
-						
-					</FrameLayout>
-				</LinearLayout>
-				
-				
-				<!-- 임신 상태 정보 그룹 레이아웃 -->
-				<LinearLayout
-					android:layout_width="match_parent"
-					android:layout_height="156dp"
-					android:background="#efefef"
-					android:visibility="gone"></LinearLayout>
-			
-			</LinearLayout>
-			
-			<!-- 다가오는 일정 -->
-			<LinearLayout
-				android:id="@+id/comming_schedule_layout"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:layout_marginTop="10dp"
-				android:background="#ffffff"
-				android:orientation="vertical"
-				android:visibility="gone"
-				tools:visibility="gone">
-				// 다가오는 일정 text layout
-				
-				<FrameLayout
-					android:layout_width="match_parent"
-					android:layout_height="48dp"
-					android:orientation="horizontal">
-					
-					<TextView
-						android:layout_width="wrap_content"
-						android:layout_height="wrap_content"
-						android:layout_gravity="center_vertical"
-						android:layout_marginLeft="20dp"
-						android:text="다가오는 일정"
-						android:textColor="@color/registerPopupTextColor"
-						android:textSize="16sp" />
-					
-					<View
-						android:layout_width="match_parent"
-						android:layout_height="1dp"
-						android:layout_gravity="bottom"
-						android:background="@color/greyMainLineColor" />
-				</FrameLayout>
-				
-				<!-- 일정 있을때 -->
-				<androidx.recyclerview.widget.RecyclerView
-					android:id="@+id/mainIncomingDiaryRecyclerView"
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					android:orientation="vertical"
-					android:visibility="gone"
-					app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-					tools:listitem="@layout/item_main_incoming_diary" />
-				
-				<!-- 일정 없을때 -->
-				<LinearLayout
-					android:id="@+id/mainIncomingDiaryEmptyView"
-					android:layout_width="match_parent"
-					android:layout_height="220dp"
-					android:background="#efefef"
-					android:gravity="center_horizontal">
-					
-					<TextView
-						android:layout_width="wrap_content"
-						android:layout_height="wrap_content"
-						android:layout_gravity="center"
-						android:text="일정이 없어요."
-						android:textColor="@color/greyMainLineColor"
-						android:textSize="35sp" />
-				</LinearLayout>
-			</LinearLayout>
-		</LinearLayout>
-	</ScrollView>
-	
-	<!-- bottom navigation -->
-	<com.google.android.material.bottomnavigation.BottomNavigationView
-		android:id="@+id/nav_view"
-		android:layout_width="0dp"
-		android:layout_height="wrap_content"
-		android:layout_alignParentBottom="true"
-		android:layout_marginStart="0dp"
-		android:layout_marginEnd="0dp"
-		android:background="#ffffff"
-		app:itemIconTint="@color/greyTextColor"
-		app:labelVisibilityMode="unlabeled"
-		app:layout_constraintBottom_toBottomOf="parent"
-		app:layout_constraintLeft_toLeftOf="parent"
-		app:layout_constraintRight_toRightOf="parent"
-		app:menu="@menu/bottom_nav_menu" />
+                                                   xmlns:app="http://schemas.android.com/apk/res-auto"
+                                                   xmlns:tools="http://schemas.android.com/tools"
+                                                   android:id="@+id/container"
+                                                   android:layout_width="match_parent"
+                                                   android:layout_height="match_parent"
+                                                   android:background="#efefef">
+
+    <!-- toolbar -->
+    <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="#ffffff"
+            android:theme="?attr/actionBarTheme"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+        <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+            <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginStart="85dp"
+                    android:layout_marginTop="100dp"
+                    android:layout_marginBottom="100dp"
+                    android:background="@drawable/logo_mint"/>
+
+            <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                <ImageButton
+                        android:id="@+id/sound"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginRight="10dp"
+                        android:background="@drawable/music_button"/>
+
+
+                <ImageButton
+                        android:id="@+id/go_to_home"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginRight="10dp"
+                        android:background="@drawable/home_button"/>
+
+
+            </LinearLayout>
+
+        </RelativeLayout>
+
+    </androidx.appcompat.widget.Toolbar>
+
+    <FrameLayout
+            android:id="@+id/frame_layout"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@+id/nav_view"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/toolbar"/>
+
+    <ScrollView
+            android:id="@+id/main_all_Scrollview"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:visibility="visible"
+            app:layout_constraintBottom_toTopOf="@+id/nav_view"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/toolbar">
+
+        <!-- scrollView 밑에 부모뷰 -->
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+            <!-- 아기를 추가해 주세요.(맨처음, 보이고 안보인다) -->
+            <LinearLayout
+                    android:id="@+id/first_add_baby_layout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="100dp"
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    tools:visibility="visible">
+
+                <ImageButton
+                        android:id="@+id/add_baby"
+                        android:layout_width="300dp"
+                        android:layout_height="250dp"
+                        android:background="@drawable/baby_empty"/>
+            </LinearLayout>
+
+
+            <!--- 아가 사진 섹션/메인 사진 -->
+            <FrameLayout
+                    android:id="@+id/main_baby_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                // 아가 사진 없을 때, 등록하세요
+                // 아기 사진 없이 등록했을 때 보이는거
+                // 보여야 하는거
+
+                <LinearLayout
+                        android:id="@+id/no_register_baby_image_layout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="40dp"
+                        android:orientation="vertical"
+                        android:visibility="gone"
+                        tools:visibility="gone">
+
+                    <ImageButton
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal|center"
+                            android:background="@drawable/add_baby_image"
+                            android:gravity="center|center_horizontal"/>
+
+                    <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal|center"
+                            android:layout_marginTop="10dp"
+                            android:gravity="center|center_horizontal"
+                            android:text="사진을 등록해주세요!"
+                            android:textColor="@color/greyMainTextColor"
+                            android:textSize="32sp"/>
+
+                </LinearLayout>
+                // 리얼 사진, 사진 있으면 보여야 하는거
+                // 보여야 하는거
+
+                <ImageView
+                        android:id="@+id/real_baby_image"
+                        android:layout_width="match_parent"
+                        android:layout_height="315dp"
+                        android:scaleType="centerCrop"
+                        android:visibility="gone"
+                        tools:background="@drawable/test_image"/>
+
+                <ImageButton
+                        android:id="@+id/main_image_off_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"
+                        android:layout_marginTop="20dp"
+                        android:layout_marginRight="15dp"
+                        android:layout_marginBottom="15dp"
+                        android:background="@drawable/main_image_on"/>
+
+            </FrameLayout>
+
+            <!-- main top -->
+            <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                <LinearLayout
+                        android:id="@+id/main_top_layout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/main_top_layout"
+                        android:orientation="vertical"
+                        android:visibility="gone"
+                        tools:visibility="visible">
+
+                    <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="right"
+                            android:layout_marginTop="18dp"
+                            android:layout_marginRight="50dp"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                        <androidx.appcompat.widget.AppCompatTextView
+                                android:id="@+id/BabyNameView"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="@android:color/white"
+                                android:textSize="24sp"
+                                android:textStyle="bold"
+                                app:autoSizeMinTextSize="12sp"
+                                app:autoSizeTextType="uniform"
+                                tools:text="동동이"/>
+
+                        <androidx.appcompat.widget.AppCompatImageView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="bottom"
+                                android:layout_marginStart="4dp"
+                                app:srcCompat="@drawable/noti_icon"/>
+
+                        <androidx.appcompat.widget.AppCompatTextView
+                                android:id="@+id/BabyBirthView"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="bottom"
+                                android:layout_marginStart="8dp"
+                                android:textColor="@android:color/white"
+                                android:textSize="12sp"
+                                tools:text="@tools:sample/date/ddmmyy"/>
+                    </LinearLayout>
+
+                    <LinearLayout
+                            android:layout_width="200dp"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="right"
+                            android:layout_marginTop="4dp"
+                            android:layout_marginBottom="4dp"
+                            android:orientation="vertical">
+
+                        <androidx.appcompat.widget.AppCompatTextView
+                                android:id="@+id/BabyDescriptionView"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:lineSpacingExtra="-4sp"
+                                android:textColor="@android:color/white"
+                                android:textSize="13sp"
+                                tools:maxLines="2"
+                                tools:text="@tools:sample/lorem/random"/>
+                    </LinearLayout>
+
+                    <FrameLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="right"
+                            android:layout_marginRight="10dp"
+                            android:layout_marginBottom="5dp"
+                            android:background="@drawable/dust">
+
+                    </FrameLayout>
+                </LinearLayout>
+
+
+                <!-- 임신 상태 정보 그룹 레이아웃 -->
+                <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="110dp"
+                        android:background="#ffffff"
+                        android:orientation="vertical"
+                        android:visibility="visible">
+
+                    <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                        <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                            <ImageView
+                                    android:id="@+id/period_1_text"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center"
+                                    android:layout_marginBottom="3dp"
+                                    android:background="@drawable/period"/>
+
+                            <ImageView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center"
+                                    android:background="@drawable/pregnant_perioid_empty"/>
+
+                            <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="임신초기"
+                                    android:layout_gravity="center"
+                                    android:layout_marginTop="3dp"
+                                    android:textSize="16sp"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                            <ImageView
+                                    android:id="@+id/period_2_text"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center"
+                                    android:layout_marginBottom="3dp"
+                                    android:background="@drawable/period"
+                                    android:textColor="@color/greyTextColor"
+                                    android:visibility="invisible"/>
+
+                            <ImageView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center"
+                                    android:background="@drawable/pregnant_perioid_empty"/>
+                            <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="임신중기"
+                                    android:textColor="@color/greyMainLineColor"
+                                    android:layout_gravity="center"
+                                    android:layout_marginTop="3dp"
+                                    android:textSize="16sp"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                            <ImageView
+                                    android:id="@+id/period_3_text"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center"
+                                    android:layout_marginBottom="3dp"
+                                    android:background="@drawable/period"
+                                    android:visibility="invisible"/>
+
+                            <ImageView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center"
+                                    android:background="@drawable/pregnant_perioid_empty"/>
+                            <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="임신후기"
+                                    android:layout_gravity="center"
+                                    android:layout_marginTop="3dp"
+                                    android:textColor="@color/greyMainLineColor"
+                                    android:textSize="16sp"/>
+
+                        </LinearLayout>
+
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- 다가오는 일정 -->
+            <LinearLayout
+                    android:id="@+id/comming_schedule_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:background="#ffffff"
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    tools:visibility="gone">
+                // 다가오는 일정 text layout
+
+                <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:orientation="horizontal">
+
+                    <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginLeft="20dp"
+                            android:text="다가오는 일정"
+                            android:textColor="@color/registerPopupTextColor"
+                            android:textSize="16sp"/>
+
+                    <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_gravity="bottom"
+                            android:background="@color/greyMainLineColor"/>
+                </FrameLayout>
+
+                <!-- 일정 있을때 -->
+                <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/mainIncomingDiaryRecyclerView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:visibility="gone"
+                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                        tools:listitem="@layout/item_main_incoming_diary"/>
+
+                <!-- 일정 없을때 -->
+                <LinearLayout
+                        android:id="@+id/mainIncomingDiaryEmptyView"
+                        android:layout_width="match_parent"
+                        android:layout_height="220dp"
+                        android:background="#efefef"
+                        android:gravity="center_horizontal">
+
+                    <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:text="일정이 없어요."
+                            android:textColor="@color/greyMainLineColor"
+                            android:textSize="35sp"/>
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- bottom navigation -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/nav_view"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginStart="0dp"
+            android:layout_marginEnd="0dp"
+            android:background="#ffffff"
+            app:itemIconTint="@color/greyTextColor"
+            app:labelVisibilityMode="unlabeled"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:menu="@menu/bottom_nav_menu"/>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
