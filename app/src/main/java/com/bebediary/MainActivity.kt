@@ -20,6 +20,8 @@ import com.bebediary.calendar.CalendarFragment
 import com.bebediary.camera.CameraResultActivity
 import com.bebediary.camera.CameraWrapperActivity
 import com.bebediary.database.model.BabyModel
+import com.bebediary.database.model.DiaryModel
+import com.bebediary.main.adapter.IncomingDiaryAdapter
 import com.bebediary.memo.NoteListActivity
 import com.bebediary.register.BabyRegisterActivity
 import com.bebediary.util.Constants
@@ -27,12 +29,13 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationView
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.contents_main.*
 import kotlinx.android.synthetic.main.header_navigatioin.*
 
-class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, LifecycleObserver {
+class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, LifecycleObserver, IncomingDiaryAdapter.OnItemChangeListener {
 
     // Composite Disposable
     private val compositeDisposable = CompositeDisposable()
@@ -42,6 +45,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     // 현재 선택된 아이 정보
     private var currentBabyModel: BabyModel? = null
+
+    // 다이어리 Disposable
+    private var fetchDiaryDisposable: Disposable? = null
+
+    // Incoming Diary Adapter
+    private val incomingDiaryAdapter by lazy { IncomingDiaryAdapter(this) }
 
     lateinit var prefs: SharedPreferences
     lateinit var editor: SharedPreferences.Editor
@@ -54,7 +63,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         // 아이가 선택되어 있어야만 아래의 모든 작업을 할 수 있으므로 아이가 선택되어있지 않으면 리턴
         val babyId = currentBabyModel?.baby?.id
-            ?: return@OnNavigationItemSelectedListener false
+                ?: return@OnNavigationItemSelectedListener false
 
         val transaction = fragmentManager.beginTransaction()
         when (item.itemId) {
@@ -119,25 +128,28 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun fetchCurrentBaby() {
         db.babyDao().getSelected()
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(
-                {
-                    // Drawer에 아이 정보 업데이트
-                    invalidateNavigationHeader(it)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        {
+                            // Drawer에 아이 정보 업데이트
+                            invalidateNavigationHeader(it)
 
-                    // 아이 뷰 업데이트
-                    invalidateBabyView(it)
+                            // 아이 뷰 업데이트
+                            invalidateBabyView(it)
 
-                    // 멤버 변수로 저장
-                    currentBabyModel = it
+                            // 다이어리 업데이트
+                            fetchDiaries(it)
 
-                    // Logging
-                    Log.d("Main", "현재 선택된 아이 : $it")
-                },
-                { it.printStackTrace() }
-            )
-            .apply { compositeDisposable.add(this) }
+                            // 멤버 변수로 저장
+                            currentBabyModel = it
+
+                            // Logging
+                            Log.d("Main", "현재 선택된 아이 : $it")
+                        },
+                        { it.printStackTrace() }
+                )
+                .apply { compositeDisposable.add(this) }
     }
 
     /**
@@ -160,6 +172,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             main_all_Scrollview.isVisible = true
             frame_layout.isVisible = false
         }
+
+        // RecyclerView Adapter
+        mainIncomingDiaryRecyclerView.adapter = incomingDiaryAdapter
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
@@ -185,9 +200,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         // 사진 설정
         real_baby_image.isVisible = true
         GlideApp.with(real_baby_image)
-            .load(babyModel.photos.first().file)
-            .centerCrop()
-            .into(real_baby_image)
+                .load(babyModel.photos.first().file)
+                .centerCrop()
+                .into(real_baby_image)
     }
 
     /**
@@ -195,13 +210,60 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
      */
     private fun invalidateNavigationHeader(babyModel: BabyModel) {
         GlideApp.with(navigationHeaderImage)
-            .load(babyModel.photos.first().file)
-            .centerCrop()
-            .circleCrop()
-            .into(navigationHeaderImage)
+                .load(babyModel.photos.first().file)
+                .centerCrop()
+                .circleCrop()
+                .into(navigationHeaderImage)
 
         // 이름 설정
         navigationHeaderName.text = babyModel.baby.name
+    }
+
+    /**
+     * 다이어리 리스트 재 요청
+     */
+    private fun fetchDiaries(babyModel: BabyModel) {
+        // Dispose Diary Disposable
+        fetchDiaryDisposable?.dispose()
+
+        // 다이어리 리스트 요청
+        fetchDiaryDisposable = db.diaryDao().getBabyDiaries(babyModel.baby.id)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        { invalidateFetchDiaries(it) },
+                        { it.printStackTrace() }
+                )
+    }
+
+    /**
+     * 최근 일정 업데이트
+     */
+    private fun invalidateFetchDiaries(diaryModels: List<DiaryModel>) {
+        incomingDiaryAdapter.items.clear()
+        incomingDiaryAdapter.items.addAll(diaryModels)
+        incomingDiaryAdapter.notifyDataSetChanged()
+
+        // Visibility 업데이트
+        mainIncomingDiaryEmptyView.isVisible = diaryModels.isEmpty()
+        mainIncomingDiaryRecyclerView.isVisible = diaryModels.isNotEmpty()
+    }
+
+    /**
+     * 다이어리 아이템 완료 상태 변경
+     */
+    override fun onChangeDiaryComplete(diaryModel: DiaryModel, isComplete: Boolean) {
+        diaryModel.diary.isComplete = isComplete
+
+        // 업데이트
+        db.diaryDao().update(diaryModel.diary)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        { Log.d("MC", "Update Diary Model ${diaryModel.diary}") },
+                        { it.printStackTrace() }
+                )
+                .apply { compositeDisposable.add(this) }
     }
 
     private fun babyInfoSetting() {

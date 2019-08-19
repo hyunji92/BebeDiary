@@ -13,7 +13,7 @@ import com.bebediary.database.model.DiaryAttachmentModel
 @Database(
         entities = [Baby::class, Attachment::class, Note::class, Diary::class, DiaryAttachment::class],
         views = [DiaryAttachmentModel::class],
-        version = 5
+        version = 6
 )
 @TypeConverters(SexTypeConverter::class, DateTypeConverter::class, FileTypeConverter::class)
 abstract class AppDatabase : RoomDatabase() {

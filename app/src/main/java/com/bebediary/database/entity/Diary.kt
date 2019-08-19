@@ -7,10 +7,11 @@ import java.util.*
 
 @Entity
 data class Diary(
-    @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    @ColumnInfo val babyId: Long,
-    @ColumnInfo val content: String,
-    @ColumnInfo val date: Date,
-    @ColumnInfo val isEnableNotification: Boolean,
-    @ColumnInfo val createdAt: Date = Date()
+        @PrimaryKey(autoGenerate = true) val id: Long = 0,
+        @ColumnInfo val babyId: Long,
+        @ColumnInfo val content: String,
+        @ColumnInfo val date: Date,
+        @ColumnInfo var isComplete: Boolean = false,
+        @ColumnInfo val isEnableNotification: Boolean,
+        @ColumnInfo val createdAt: Date = Date()
 )
