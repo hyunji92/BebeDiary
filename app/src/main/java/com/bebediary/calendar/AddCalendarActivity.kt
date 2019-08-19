@@ -19,10 +19,12 @@ import com.bebediary.camera.CameraWrapperActivity
 import com.bebediary.database.entity.Attachment
 import com.bebediary.database.entity.Diary
 import com.bebediary.database.entity.DiaryAttachment
+import com.bebediary.database.model.DiaryModel
 import com.bebediary.util.Constants
 import com.bebediary.util.extension.toAttachment
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_add_calendar.*
 import java.io.File
@@ -38,24 +40,23 @@ class AddCalendarActivity : AppCompatActivity(), LifecycleObserver, AddCalendarA
         get() = intent.getLongExtra("babyId", -1L)
 
     // 일정을 추가할 날짜 데이터
+    // 날짜 데이터는 연 월 일이 무조건 동시에 바뀐다는 가정하에
+    // dayOfMonth가 변경될때만 캘린더 뷰를 업데이트 하고 다이어리 정보를 요청한다
     private var year = -1
-        set(value) {
-            field = value
-            invalidateAddCalendarDateView()
-        }
     private var month = -1
-        set(value) {
-            field = value
-            invalidateAddCalendarDateView()
-        }
     private var day = -1
         set(value) {
             field = value
             invalidateAddCalendarDateView()
+            fetchDiary()
         }
 
     // 일정 추가할 날짜 Calendar
-    private val date get() = Calendar.getInstance().apply { set(year, month, day) }
+    private val date
+        get() = Calendar.getInstance().apply {
+            set(year, month, day, 0, 0, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
 
     // 알림 상태 여부 데이터
     private var isNotification = false
@@ -72,6 +73,20 @@ class AddCalendarActivity : AppCompatActivity(), LifecycleObserver, AddCalendarA
 
     // Database
     private val db by lazy { (application as MyApplication).db }
+
+    // Fetch Diary Disposable
+    private var fetchDiaryDisposable: Disposable? = null
+
+    // 이미 데이터가 들어있는 경우 저장
+    private var preloadDiary: DiaryModel? = null
+        set(value) {
+            field = value
+            invalidatePreloadDiary(value)
+        }
+
+    // 수정 모드
+    private val isEdit: Boolean
+        get() = preloadDiary != null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -111,6 +126,33 @@ class AddCalendarActivity : AppCompatActivity(), LifecycleObserver, AddCalendarA
         addCalendarSave.setOnClickListener { editOrSave() }
     }
 
+    private fun fetchDiary() {
+
+        // 기존 실행중인 작업이 있다면 종료
+        fetchDiaryDisposable?.dispose()
+
+        // 다음날 정보
+        val nextDate = Calendar.getInstance().apply {
+            timeInMillis = date.timeInMillis
+            add(Calendar.DAY_OF_MONTH, 1)
+        }
+
+        // 데이터 기본으로 없애버림
+        preloadDiary = null
+
+        // 해당 날짜 및 다음 날짜 다이어리 정보
+        fetchDiaryDisposable = db.diaryDao().getDiaryByDate(babyId, date.timeInMillis, nextDate.timeInMillis)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        {
+                            // 다이어리 정보 업데이트
+                            preloadDiary = it
+                        },
+                        { it.printStackTrace() }
+                )
+    }
+
     /**
      * 날짜 변경 다이얼로그 띄움
      */
@@ -145,6 +187,32 @@ class AddCalendarActivity : AppCompatActivity(), LifecycleObserver, AddCalendarA
      */
     private fun invalidateNotificationView() {
         addCalendarNotificationView.setImageResource(if (isNotification) R.drawable.noti_icon else R.drawable.noti_icon_off)
+    }
+
+    /**
+     * 이미 작성된 다이어리 모델 업데이트
+     */
+    private fun invalidatePreloadDiary(diaryModel: DiaryModel?) {
+
+        // 저장, 수정 버튼 텍스트 변경
+        addCalendarSave.text = if (isEdit) "수정" else "저장"
+
+        // 수정일때는 날짜 변경 불가하게 설정
+        date_picker_button.isEnabled = !isEdit
+
+        // 내용 업데이트
+        addCalendarContent.setText(diaryModel?.diary?.content ?: "")
+
+        // 알림 상태 업데이트
+        isNotification = diaryModel?.diary?.isEnableNotification ?: false
+
+        // 첨부파일 업데이트
+        addCalendarAttachmentAdapter.items.clear()
+        if (diaryModel?.diaryAttachments?.isNotEmpty() == true) {
+            val attachmentModels = diaryModel.diaryAttachments
+            addCalendarAttachmentAdapter.items.addAll(attachmentModels.map { it.attachments.first() })
+        }
+        addCalendarAttachmentAdapter.notifyDataSetChanged()
     }
 
     /**
@@ -208,11 +276,37 @@ class AddCalendarActivity : AppCompatActivity(), LifecycleObserver, AddCalendarA
             return
         }
 
-        save()
+        if (isEdit) edit() else save()
     }
 
+    /**
+     * 기존 다이어리 첨부파일 전부 제거
+     */
     private fun edit() {
+        val preloadDiary = preloadDiary ?: return
 
+        // 업데이트할 다이어리 정보
+        val diary = preloadDiary.diary
+        diary.content = addCalendarContent.text.toString()
+        diary.isEnableNotification = isNotification
+
+        // 기존 첨부파일 제거 및 데이터 입력
+        db.diaryAttachmentDao()
+                .deleteAll(preloadDiary.diaryAttachments.map { it.diaryAttachment })
+                .flatMap { db.diaryDao().update(diary) }
+                .flatMap { _ ->
+                    val diaryAttachments = addCalendarAttachmentAdapter.items.map {
+                        DiaryAttachment(diaryId = diary.id, attachmentId = it.id)
+                    }
+                    db.diaryAttachmentDao().insertAll(diaryAttachments)
+                }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        { finish() },
+                        { it.printStackTrace() }
+                )
+                .apply { compositeDisposable.add(this) }
     }
 
     /**
