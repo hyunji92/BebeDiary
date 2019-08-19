@@ -5,12 +5,15 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
 import android.view.View
+import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.GravityCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
@@ -36,6 +39,8 @@ import kotlinx.android.synthetic.main.contents_main.*
 import kotlinx.android.synthetic.main.header_navigatioin.*
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, LifecycleObserver, IncomingDiaryAdapter.OnItemChangeListener {
+
+    lateinit var drawerToggle: ActionBarDrawerToggle
 
     // Composite Disposable
     private val compositeDisposable = CompositeDisposable()
@@ -98,6 +103,35 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         false
     }
 
+    override fun onBackPressed() {
+        super.onBackPressed()
+        if (dl_main_drawer_root.isDrawerOpen(GravityCompat.START)) {
+            dl_main_drawer_root.closeDrawer(GravityCompat.START)
+        } else {
+            super.onBackPressed()
+        }
+
+    }
+
+    override fun onPostCreate(savedInstanceState: Bundle?) {
+        super.onPostCreate(savedInstanceState)
+        drawerToggle.syncState()
+
+
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration?) {
+        super.onConfigurationChanged(newConfig)
+        drawerToggle.onConfigurationChanged(newConfig)
+
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        if (drawerToggle.onOptionsItemSelected(item)) {
+            return true
+        }
+        return super.onOptionsItemSelected(item)
+    }
     @SuppressLint("CheckResult")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -109,6 +143,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             setOnNavigationItemSelectedListener(onNavigationItemSelectedListener)
         }
 
+        drawerToggle = ActionBarDrawerToggle(
+            this,
+            dl_main_drawer_root,
+            toolbar,
+            R.string.drawer_open,
+            R.string.drawer_close
+        )
+        dl_main_drawer_root.addDrawerListener(drawerToggle)
         // 메인 네비게이션 클릭 리스너
         nv_main_navigation_root.setNavigationItemSelectedListener(this)
 
@@ -354,6 +396,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
      * Navigation Item 선택시 불리는 리스너
      */
     override fun onNavigationItemSelected(menuItem: MenuItem): Boolean {
+        dl_main_drawer_root.closeDrawer(GravityCompat.START)
+
         when (menuItem.itemId) {
             R.id.more_baby -> {
                 startActivity(Intent(this, BabyChangeActivity::class.java))
