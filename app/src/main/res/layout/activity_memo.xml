@@ -40,7 +40,7 @@
                     android:focusable="true"
                     android:foreground="?selectableItemBackgroundBorderless"
                     android:gravity="center_vertical"
-                    android:src="@drawable/ic_arrow_back" />
+                    android:src="@drawable/ic_arrow_back_1" />
 
                 <TextView
                     android:layout_width="wrap_content"

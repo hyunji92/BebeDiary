@@ -35,7 +35,7 @@
                     android:layout_height="36dp"
                     android:layout_gravity="center_vertical"
                     android:layout_marginEnd="8dp"
-                    android:background="@drawable/ic_arrow_back"
+                    android:background="@drawable/ic_arrow_back_1"
                     android:clickable="true"
                     android:focusable="true"
                     android:gravity="center_vertical" />

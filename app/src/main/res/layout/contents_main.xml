@@ -24,8 +24,8 @@
             android:orientation="horizontal">
 
             <ImageView
-                android:layout_width="100dp"
-                android:layout_height="30dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:background="@drawable/logo_mint" />
 
@@ -34,6 +34,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
+                android:gravity="center_vertical"
                 android:orientation="horizontal">
 
                 <ImageButton
@@ -41,6 +42,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginRight="10dp"
+                    android:layout_gravity="center_vertical"
                     android:background="@drawable/music_button" />
 
 
@@ -49,6 +51,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginRight="10dp"
+                    android:layout_gravity="center_vertical"
                     android:background="@drawable/home_button" />
 
 
@@ -89,8 +92,8 @@
                 android:id="@+id/first_add_baby_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="190dp"
-                android:gravity="center|center_vertical"
+                android:layout_marginTop="100dp"
+                android:layout_gravity="center"
                 android:orientation="vertical"
                 android:visibility="gone"
                 tools:visibility="visible">
@@ -99,8 +102,6 @@
                     android:id="@+id/add_baby"
                     android:layout_width="300dp"
                     android:layout_height="250dp"
-                    android:layout_gravity="center|center_horizontal"
-                    android:layout_marginLeft="30dp"
                     android:background="@drawable/baby_empty" />
             </LinearLayout>
 
@@ -208,7 +209,8 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="156dp"
-                    android:background="@android:color/white" />
+                    android:visibility="gone"
+                    android:background="#efefef" />
             </LinearLayout>
 
             <!-- 다가오는 일정 -->
