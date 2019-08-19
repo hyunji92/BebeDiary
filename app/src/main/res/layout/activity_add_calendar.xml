@@ -30,13 +30,15 @@
                 android:orientation="horizontal">
 
                 <ImageButton
-                    android:id="@+id/back_button"
-                    android:layout_width="38dp"
-                    android:layout_height="38dp"
+                    android:id="@+id/addCalendarBackButton"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginRight="5dp"
+                    android:layout_marginEnd="8dp"
                     android:background="@drawable/ic_arrow_back"
                     android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackgroundBorderless"
                     android:gravity="center_vertical" />
 
                 <TextView
@@ -63,28 +65,37 @@
 
                 <Button
                     android:id="@+id/addCalendarSave"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:layout_marginRight="5dp"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_marginEnd="8dp"
                     android:background="@android:color/transparent"
                     android:foreground="?attr/selectableItemBackgroundBorderless"
                     android:text="저장"
                     android:textColor="@color/registerPopupTextColor" />
 
-                <View
-                    android:layout_width="1dp"
-                    android:layout_height="10dp"
-                    android:background="@color/registerPopupTextColor" />
+                <LinearLayout
+                    android:id="@+id/addCalendarDeleteGroup"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
-                <Button
-                    android:id="@+id/delete_calendar_button"
-                    android:layout_width="35dp"
-                    android:layout_height="35dp"
-                    android:layout_marginLeft="5dp"
-                    android:background="@android:color/transparent"
-                    android:clickable="true"
-                    android:text="삭제"
-                    android:textColor="@color/registerPopupTextColor" />
+                    <View
+                        android:layout_width="1dp"
+                        android:layout_height="10dp"
+                        android:background="@color/registerPopupTextColor" />
+
+                    <Button
+                        android:id="@+id/addCalendarDelete"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:layout_marginStart="8dp"
+                        android:background="@android:color/transparent"
+                        android:clickable="true"
+                        android:foreground="?attr/selectableItemBackgroundBorderless"
+                        android:text="삭제"
+                        android:textColor="@color/registerPopupTextColor" />
+                </LinearLayout>
             </LinearLayout>
         </RelativeLayout>
 

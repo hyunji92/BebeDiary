@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.view.ContextThemeWrapper
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
@@ -124,6 +125,12 @@ class AddCalendarActivity : AppCompatActivity(), LifecycleObserver, AddCalendarA
 
         // 저장 혹은 수정 작업
         addCalendarSave.setOnClickListener { editOrSave() }
+
+        // 삭제
+        addCalendarDelete.setOnClickListener { delete() }
+
+        // 종료
+        addCalendarBackButton.setOnClickListener { finish() }
     }
 
     private fun fetchDiary() {
@@ -199,6 +206,9 @@ class AddCalendarActivity : AppCompatActivity(), LifecycleObserver, AddCalendarA
 
         // 수정일때는 날짜 변경 불가하게 설정
         date_picker_button.isEnabled = !isEdit
+
+        // 삭제 버튼 숨김
+        addCalendarDeleteGroup.isVisible = isEdit
 
         // 내용 업데이트
         addCalendarContent.setText(diaryModel?.diary?.content ?: "")
@@ -336,6 +346,23 @@ class AddCalendarActivity : AppCompatActivity(), LifecycleObserver, AddCalendarA
                         {
                             finish()
                         },
+                        { it.printStackTrace() }
+                )
+                .apply { compositeDisposable.add(this) }
+    }
+
+    /**
+     * 다이어리 삭제
+     */
+    private fun delete() {
+        val preloadDiary = preloadDiary ?: return
+
+        // 데이터 베이스에 입력
+        db.diaryDao().deleteAll(listOf(preloadDiary.diary))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        { finish() },
                         { it.printStackTrace() }
                 )
                 .apply { compositeDisposable.add(this) }
