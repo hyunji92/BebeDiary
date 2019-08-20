@@ -12,7 +12,9 @@ import kotlinx.android.synthetic.main.item_calendar_list.view.*
 import java.text.SimpleDateFormat
 import java.util.*
 
-class CalendarListAdapter : RecyclerView.Adapter<CalendarListAdapter.ViewHolder>() {
+class CalendarListAdapter(
+    private val onItemClickListener: OnItemClickListener
+) : RecyclerView.Adapter<CalendarListAdapter.ViewHolder>() {
 
     var items: Map<Date, DiaryModel?>? = null
 
@@ -43,6 +45,14 @@ class CalendarListAdapter : RecyclerView.Adapter<CalendarListAdapter.ViewHolder>
         private val dateSaturdayColor = 0xFF6BC4C8.toInt()
         private val dateSundayColor = 0xFFFF8484.toInt()
 
+        init {
+            // 아이템 선택시
+            itemView.setOnClickListener {
+                val date = date ?: return@setOnClickListener
+                onItemClickListener.onClick(date, diaryModel)
+            }
+        }
+
         fun invalidate() {
             val date = date ?: return
             val hasDiary = diaryModel != null
@@ -55,11 +65,11 @@ class CalendarListAdapter : RecyclerView.Adapter<CalendarListAdapter.ViewHolder>
             // 캘린더 리스트 날짜 설정
             itemView.calendarListDateView.text = dateFormat.format(date).toUpperCase()
             itemView.calendarListDateView.setTextColor(
-                    when {
-                        calendar.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY -> dateSaturdayColor
-                        calendar.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY -> dateSundayColor
-                        else -> dateDefaultColor
-                    }
+                when {
+                    calendar.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY -> dateSaturdayColor
+                    calendar.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY -> dateSundayColor
+                    else -> dateDefaultColor
+                }
             )
 
             // Visibility 설정
@@ -75,10 +85,14 @@ class CalendarListAdapter : RecyclerView.Adapter<CalendarListAdapter.ViewHolder>
             val diaryAttachment = diaryModel?.diaryAttachments?.firstOrNull()
             if (diaryAttachment != null) {
                 GlideApp.with(itemView)
-                        .load(diaryAttachment.attachments.first().file)
-                        .centerCrop()
-                        .into(itemView.calendarListImageView)
+                    .load(diaryAttachment.attachments.first().file)
+                    .centerCrop()
+                    .into(itemView.calendarListImageView)
             }
         }
+    }
+
+    interface OnItemClickListener {
+        fun onClick(date: Date, diaryModel: DiaryModel?)
     }
 }

@@ -1,5 +1,6 @@
 package com.bebediary.calendar.list
 
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
@@ -12,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import com.bebediary.MyApplication
 import com.bebediary.R
+import com.bebediary.calendar.detail.CalendarDetailActivity
 import com.bebediary.calendar.list.adapter.CalendarListAdapter
 import com.bebediary.calendar.list.adapter.CalendarListHeaderAdapter
 import com.bebediary.database.model.DiaryModel
@@ -30,7 +32,7 @@ import java.util.concurrent.TimeUnit
 /**
  * 캘린더 정보를 리스트로 볼 수 있는 액티비티
  */
-class CalendarListActivity : AppCompatActivity(), LifecycleObserver {
+class CalendarListActivity : AppCompatActivity(), LifecycleObserver, CalendarListAdapter.OnItemClickListener {
 
     // Year, Month
     // 무조건 동시에 업데이트 되므로 월 변경시 날짜 변경 작업 실행
@@ -50,7 +52,7 @@ class CalendarListActivity : AppCompatActivity(), LifecycleObserver {
     private val calendarListHeaderPagerSnapHelper by lazy { PagerSnapHelper() }
 
     // RecyclerView Adapter
-    private val calendarListAdapter by lazy { CalendarListAdapter() }
+    private val calendarListAdapter by lazy { CalendarListAdapter(this) }
 
     // 페이지 변경 Subject
     private val dateChangeSubject by lazy { PublishSubject.create<Calendar>() }
@@ -102,19 +104,19 @@ class CalendarListActivity : AppCompatActivity(), LifecycleObserver {
 
         // 헤더 페이지 변경시 날짜 변경
         calendarListHeaderView.addOnScrollListener(SnapPagerScrollListener(
-                calendarListHeaderPagerSnapHelper,
-                SnapPagerScrollListener.ON_SETTLED,
-                true,
-                object : SnapPagerScrollListener.OnChangeListener {
-                    override fun onSnapped(position: Int) {
-                        val calendar = calendarListHeaderAdapter.calculateCalendar(position)
-                        year = calendar.get(Calendar.YEAR)
-                        month = calendar.get(Calendar.MONTH)
+            calendarListHeaderPagerSnapHelper,
+            SnapPagerScrollListener.ON_SETTLED,
+            true,
+            object : SnapPagerScrollListener.OnChangeListener {
+                override fun onSnapped(position: Int) {
+                    val calendar = calendarListHeaderAdapter.calculateCalendar(position)
+                    year = calendar.get(Calendar.YEAR)
+                    month = calendar.get(Calendar.MONTH)
 
-                        // 데이트 변경 체인지 데이터 넘김
-                        dateChangeSubject.onNext(calendar)
-                    }
+                    // 데이트 변경 체인지 데이터 넘김
+                    dateChangeSubject.onNext(calendar)
                 }
+            }
         ))
     }
 
@@ -134,14 +136,14 @@ class CalendarListActivity : AppCompatActivity(), LifecycleObserver {
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun subscribeDateChange() {
         dateChangeSubject
-                .debounce(500, TimeUnit.MILLISECONDS)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        { subscribeDiaries(it) },
-                        { it.printStackTrace() }
-                )
-                .apply { compositeDisposable.add(this) }
+            .debounce(500, TimeUnit.MILLISECONDS)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                { subscribeDiaries(it) },
+                { it.printStackTrace() }
+            )
+            .apply { compositeDisposable.add(this) }
 
     }
 
@@ -156,53 +158,53 @@ class CalendarListActivity : AppCompatActivity(), LifecycleObserver {
 
         // 다이어리 시작 날짜
         val startedAt = Calendar.getInstance()
-                .apply {
-                    timeInMillis = calendar.timeInMillis
-                    set(
-                            calendar.get(Calendar.YEAR),
-                            calendar.get(Calendar.MONTH),
-                            calendar.get(Calendar.DAY_OF_MONTH),
-                            0, 0, 0
-                    )
-                    set(Calendar.MILLISECOND, 0)
-                }
+            .apply {
+                timeInMillis = calendar.timeInMillis
+                set(
+                    calendar.get(Calendar.YEAR),
+                    calendar.get(Calendar.MONTH),
+                    calendar.get(Calendar.DAY_OF_MONTH),
+                    0, 0, 0
+                )
+                set(Calendar.MILLISECOND, 0)
+            }
 
         // 다이어리 끝 날짜
         val endedAt = Calendar.getInstance()
-                .apply {
-                    timeInMillis = startedAt.timeInMillis
-                    add(Calendar.MONTH, 1)
-                }
+            .apply {
+                timeInMillis = startedAt.timeInMillis
+                add(Calendar.MONTH, 1)
+            }
 
         // 새로운 날짜로 다이어리 구독
         diariesDisposable = db.diaryDao()
-                .getDiaryByDateRange(babyId, startedAt.timeInMillis, endedAt.timeInMillis)
-                .map {
-                    it.map { model -> dateFormat.format(model.diary.date) to model }.toMap()
+            .getDiaryByDateRange(babyId, startedAt.timeInMillis, endedAt.timeInMillis)
+            .map {
+                it.map { model -> dateFormat.format(model.diary.date) to model }.toMap()
+            }
+            .map {
+                val items = sortedMapOf<Date, DiaryModel?>()
+
+                // 시작 날짜 달의 모든 날짜의 데이터 확인해서 데이터 생성
+                val date = Calendar.getInstance().apply { timeInMillis = startedAt.timeInMillis }
+                for (dayOfMonth in 1..startedAt.getActualMaximum(Calendar.DAY_OF_MONTH)) {
+
+                    // 날짜 설정
+                    date.set(Calendar.DAY_OF_MONTH, dayOfMonth)
+
+                    // 해당 월 일에 다이어리 데이터가 있는지 확인해서 있으면 추가 없으면 제외 시킨다
+                    val diaryModel = it[dateFormat.format(date.time)]
+                    items[date.time] = diaryModel
                 }
-                .map {
-                    val items = sortedMapOf<Date, DiaryModel?>()
 
-                    // 시작 날짜 달의 모든 날짜의 데이터 확인해서 데이터 생성
-                    val date = Calendar.getInstance().apply { timeInMillis = startedAt.timeInMillis }
-                    for (dayOfMonth in 1..startedAt.getActualMaximum(Calendar.DAY_OF_MONTH)) {
-
-                        // 날짜 설정
-                        date.set(Calendar.DAY_OF_MONTH, dayOfMonth)
-
-                        // 해당 월 일에 다이어리 데이터가 있는지 확인해서 있으면 추가 없으면 제외 시킨다
-                        val diaryModel = it[dateFormat.format(date.time)]
-                        items[date.time] = diaryModel
-                    }
-
-                    return@map items
-                }
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        { invalidateDiaries(it) },
-                        { it.printStackTrace() }
-                )
+                return@map items
+            }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                { invalidateDiaries(it) },
+                { it.printStackTrace() }
+            )
     }
 
     /**
@@ -219,5 +221,17 @@ class CalendarListActivity : AppCompatActivity(), LifecycleObserver {
      */
     private fun invalidateToolbarTitle() {
         collapsingToolbarLayout.title = String.format("%d-%02d", year, month + 1)
+    }
+
+    /**
+     * 캘린더 리스트에서 아이템 클릭
+     */
+    override fun onClick(date: Date, diaryModel: DiaryModel?) {
+        val model = diaryModel ?: return
+
+        val intent = Intent(this, CalendarDetailActivity::class.java)
+            .putExtra("diaryId", model.diary.id)
+            .putExtra("babyId", babyId)
+        startActivity(intent)
     }
 }
