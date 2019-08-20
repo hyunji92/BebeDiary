@@ -9,10 +9,12 @@ import androidx.lifecycle.OnLifecycleEvent
 import com.bebediary.MyApplication
 import com.bebediary.R
 import com.bebediary.database.entity.Note
+import com.bebediary.util.extension.format
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_add_memo.*
+import java.util.*
 
 class AddNoteActivity : AppCompatActivity(), LifecycleObserver {
 
@@ -53,6 +55,9 @@ class AddNoteActivity : AppCompatActivity(), LifecycleObserver {
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun initializeView() {
 
+        // 노트 현재 날짜로 설정
+        addMemoDateView.text = Calendar.getInstance().time.format("YYYY.MM.dd | HH:mm")
+
         // 뒤로가기 버튼
         back_button.setOnClickListener { finish() }
 
@@ -72,18 +77,18 @@ class AddNoteActivity : AppCompatActivity(), LifecycleObserver {
      */
     private fun prefetchNote() {
         db.noteDao().getNoteById(noteId)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        {
-                            this.note = it
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                {
+                    this.note = it
 
-                            et_title.setText(it.title)
-                            et_content.setText(it.content)
-                        },
-                        { it.printStackTrace() }
-                )
-                .apply { compositeDisposable.add(this) }
+                    et_title.setText(it.title)
+                    et_content.setText(it.content)
+                },
+                { it.printStackTrace() }
+            )
+            .apply { compositeDisposable.add(this) }
     }
 
     private fun editOrSave() {
@@ -100,24 +105,24 @@ class AddNoteActivity : AppCompatActivity(), LifecycleObserver {
         sourceNote.title = et_title.text.toString()
         sourceNote.content = et_content.text.toString()
         db.noteDao().update(sourceNote)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        { finish() },
-                        { it.printStackTrace() }
-                )
-                .apply { compositeDisposable.add(this) }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                { finish() },
+                { it.printStackTrace() }
+            )
+            .apply { compositeDisposable.add(this) }
     }
 
     private fun save() {
         val note = Note(title = et_title.text.toString(), content = et_content.text.toString(), babyId = babyId)
         db.noteDao().insert(note)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        { finish() },
-                        { it.printStackTrace() }
-                )
-                .apply { compositeDisposable.add(this) }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                { finish() },
+                { it.printStackTrace() }
+            )
+            .apply { compositeDisposable.add(this) }
     }
 }

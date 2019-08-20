@@ -121,15 +121,15 @@
             android:textSize="18sp" />
 
         <TextView
+            android:id="@+id/addMemoDateView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_above="@+id/line"
-            android:layout_alignParentRight="true"
-            android:layout_marginRight="8dp"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="8dp"
             android:layout_marginBottom="13dp"
-            android:text="2019.05.15 | 07:05"
             android:textColor="@color/greyMainLineColor"
-            android:textSize="12dp"
+            android:textSize="12sp"
             tools:text="2019.05.15 | 07:05" />
 
 
