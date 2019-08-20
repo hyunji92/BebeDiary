@@ -10,6 +10,10 @@ import io.reactivex.Maybe
 @Dao
 interface DiaryDao : BaseDao<Diary> {
 
+
+    @Query("SELECT * FROM diary WHERE id = :diaryId")
+    fun getDiary(diaryId: Long): Maybe<DiaryModel>
+
     @Query("SELECT * FROM diary WHERE babyId = :babyId")
     fun getBabyDiaries(babyId: Long): Flowable<List<DiaryModel>>
 
@@ -18,4 +22,11 @@ interface DiaryDao : BaseDao<Diary> {
 
     @Query("SELECT * FROM diary WHERE babyId = :babyId and date BETWEEN :startDateTimeInMillis AND :endDateTimeInMillis")
     fun getDiaryByDate(babyId: Long, startDateTimeInMillis: Long, endDateTimeInMillis: Long): Maybe<DiaryModel>
+
+    @Query("SELECT * FROM diary WHERE babyId = :babyId and date BETWEEN :startDateTimeInMillis AND :endDateTimeInMillis")
+    fun getDiaryByDateRange(
+        babyId: Long,
+        startDateTimeInMillis: Long,
+        endDateTimeInMillis: Long
+    ): Flowable<List<DiaryModel>>
 }

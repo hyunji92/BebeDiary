@@ -13,6 +13,7 @@ import androidx.lifecycle.OnLifecycleEvent
 import com.bebediary.GlideApp
 import com.bebediary.MyApplication
 import com.bebediary.R
+import com.bebediary.database.entity.Sex
 import com.bebediary.database.model.BabyModel
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -23,6 +24,8 @@ import java.io.File
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.TimeUnit
+import kotlin.math.abs
 
 /**
  * 아이 사진 찍은 후 워터마크 데이터를 포함한 이미지 결과로 보여주는 화면
@@ -96,12 +99,41 @@ class CameraResultActivity : AppCompatActivity(), LifecycleObserver {
         // 아이 이름 설정
         cameraResultWatermarkBabyNameView.text = babyModel.baby.name
 
+        // 성별 설정
+        cameraResultWatermarkBabyGenderView.setImageResource(
+                when (babyModel.baby.sex) {
+                    Sex.Female -> R.drawable.noti_icon
+                    Sex.Male -> R.drawable.noti_icon_off
+                }
+        )
+
+        // 생일 혹은 출산 예정일
+        val eventDate = (if (babyModel.baby.isPregnant) babyModel.baby.babyDueDate else babyModel.baby.birthday)
+                ?: return
+
         // 생일 뷰 설정
-        cameraResultWatermarkBabyBirthView.text = "2019.09.09"
+        val dateFormat = SimpleDateFormat("YYYY.MM.dd", Locale.getDefault())
+        cameraResultWatermarkBabyBirthView.text = dateFormat.format(eventDate)
+
+        // 오늘 날짜 정보
+        val today = Calendar.getInstance()
 
         // 아이 설명 뷰 설정
-        cameraResultWatermarkBabyDescriptionView.text = "만 1세 5개월 (142)일\n태어난지 507일"
+        if (babyModel.baby.isPregnant) {
+            cameraResultWatermarkBabyDescriptionView.text = "만 1세 5개월 (142)일\n태어난지 507일"
+        } else {
+            // 태어난 후 오늘까지 몇일이 지났는지
+            val diffDay = TimeUnit.MILLISECONDS.toDays(abs(today.timeInMillis - eventDate.time))
 
+            // 나이 만나이 계산 (태어난 이후 날짜 / 366)
+            val age = (diffDay / 365)
+
+            // 개월 수
+            val monthToDays = diffDay % 365
+            val month = diffDay % 365 / 30
+
+            cameraResultWatermarkBabyDescriptionView.text = "만 ${age}세 ${month}개월 ($monthToDays)일\n태어난지 ${diffDay}일"
+        }
     }
 
     /**

@@ -31,7 +31,11 @@
             android:theme="@android:style/Theme.Material.Light.Dialog.NoActionBar" />
         <activity android:name=".memo.NoteListActivity" />
         <activity android:name=".memo.AddNoteActivity" />
-        <activity android:name=".calendar.AddCalendarActivity" />
+        <activity android:name=".calendar.list.CalendarListActivity" />
+        <activity android:name=".calendar.detail.CalendarDetailActivity" />
+        <activity
+            android:name=".calendar.AddCalendarActivity"
+            android:windowSoftInputMode="adjustPan" />
         <activity android:name=".checklist.CheckListActivity" />
         <activity android:name=".baby.change.BabyChangeActivity" />
         <activity android:name=".camera.CameraWrapperActivity" />
