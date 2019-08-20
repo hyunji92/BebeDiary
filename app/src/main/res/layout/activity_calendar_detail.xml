@@ -80,7 +80,7 @@
             <View
                 android:id="@+id/calendarDetailContentDivider"
                 android:layout_width="match_parent"
-                android:layout_height="1dp"
+                android:layout_height="0.5dp"
                 android:layout_marginTop="8dp"
                 android:background="#FFA6A7A7"
                 app:layout_constraintEnd_toEndOf="parent"
