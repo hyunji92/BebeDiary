@@ -28,7 +28,7 @@ fun Baby.dueDateToText(): String {
     val todayCalendar = Calendar.getInstance()
 
     // 날짜 차이
-    val diffDays = TimeUnit.MILLISECONDS.toDays(todayCalendar.timeInMillis - pregnantCalendar.timeInMillis)
+    val diffDays = TimeUnit.MILLISECONDS.toDays(pregnantCalendar.timeInMillis - todayCalendar.timeInMillis)
 
     // 주차, 날짜
     val month = diffDays / 7
@@ -47,7 +47,7 @@ fun Baby.birthdayToText(): String {
     val todayCalendar = Calendar.getInstance()
 
     // 태어난 후 오늘까지 몇일이 지났는지
-    val diffDay = TimeUnit.MILLISECONDS.toDays(abs(todayCalendar.timeInMillis - date.time))
+    val diffDay = TimeUnit.MILLISECONDS.toDays(abs(date.time - todayCalendar.timeInMillis))
 
     // 나이 만나이 계산 (태어난 이후 날짜 / 366)
     val age = (diffDay / 365)
