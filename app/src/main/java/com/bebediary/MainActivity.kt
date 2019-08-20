@@ -45,7 +45,8 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 
-class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, LifecycleObserver, IncomingDiaryAdapter.OnItemChangeListener {
+class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, LifecycleObserver,
+    IncomingDiaryAdapter.OnItemChangeListener {
 
     lateinit var drawerToggle: ActionBarDrawerToggle
 
@@ -76,7 +77,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         // 아이가 선택되어 있어야만 아래의 모든 작업을 할 수 있으므로 아이가 선택되어있지 않으면 리턴
         val babyId = currentBabyModel?.baby?.id
-                ?: return@OnNavigationItemSelectedListener false
+            ?: return@OnNavigationItemSelectedListener false
 
         val transaction = fragmentManager.beginTransaction()
         when (item.itemId) {
@@ -143,6 +144,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
         return super.onOptionsItemSelected(item)
     }
+
     @SuppressLint("CheckResult")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -181,28 +183,28 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun fetchCurrentBaby() {
         db.babyDao().getSelected()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        {
-                            // Drawer에 아이 정보 업데이트
-                            invalidateNavigationHeader(it)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                {
+                    // Drawer에 아이 정보 업데이트
+                    invalidateNavigationHeader(it)
 
-                            // 아이 뷰 업데이트
-                            invalidateBabyView(it)
+                    // 아이 뷰 업데이트
+                    invalidateBabyView(it)
 
-                            // 다이어리 업데이트
-                            fetchDiaries(it)
+                    // 다이어리 업데이트
+                    fetchDiaries(it)
 
-                            // 멤버 변수로 저장
-                            currentBabyModel = it
+                    // 멤버 변수로 저장
+                    currentBabyModel = it
 
-                            // Logging
-                            Log.d("Main", "현재 선택된 아이 : $it")
-                        },
-                        { it.printStackTrace() }
-                )
-                .apply { compositeDisposable.add(this) }
+                    // Logging
+                    Log.d("Main", "현재 선택된 아이 : $it")
+                },
+                { it.printStackTrace() }
+            )
+            .apply { compositeDisposable.add(this) }
     }
 
     /**
@@ -310,10 +312,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
      */
     private fun invalidateNavigationHeader(babyModel: BabyModel) {
         GlideApp.with(navigationHeaderImage)
-                .load(babyModel.photos.first().file)
-                .centerCrop()
-                .circleCrop()
-                .into(navigationHeaderImage)
+            .load(babyModel.photos.first().file)
+            .centerCrop()
+            .circleCrop()
+            .into(navigationHeaderImage)
 
         // 이름 설정
         navigationHeaderName.text = babyModel.baby.name
@@ -340,13 +342,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         // 최근 일정 다이어리 리스트 요청
         fetchDiaryDisposable = db.diaryDao()
-                .getDiaryByDateRange(babyModel.baby.id, startedAt.timeInMillis, endedAt.timeInMillis)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        { invalidateFetchDiaries(it) },
-                        { it.printStackTrace() }
-                )
+            .getDiaryByDateRange(babyModel.baby.id, startedAt.timeInMillis, endedAt.timeInMillis)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                { invalidateFetchDiaries(it) },
+                { it.printStackTrace() }
+            )
     }
 
     /**
@@ -370,13 +372,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         // 업데이트
         db.diaryDao().update(diaryModel.diary)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        { Log.d("MC", "Update Diary Model ${diaryModel.diary}") },
-                        { it.printStackTrace() }
-                )
-                .apply { compositeDisposable.add(this) }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                { Log.d("MC", "Update Diary Model ${diaryModel.diary}") },
+                { it.printStackTrace() }
+            )
+            .apply { compositeDisposable.add(this) }
     }
 
     private fun babyInfoSetting() {
@@ -472,6 +474,42 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         when (menuItem.itemId) {
             R.id.more_baby -> {
                 startActivity(Intent(this, BabyChangeActivity::class.java))
+            }
+            R.id.guide -> {
+                val intent = Intent(Intent.ACTION_VIEW).setData(Uri.parse("http://www.bebediary.co.kr/app/guide/"))
+                startActivity(intent)
+            }
+            R.id.pregnant_guide -> {
+                val intent = Intent(Intent.ACTION_VIEW).setData(Uri.parse("http://www.bebediary.co.kr/app/baby_info/"))
+                startActivity(intent)
+            }
+            R.id.review -> {
+
+                val intent = Intent(Intent.ACTION_VIEW).apply {
+                    data = Uri.parse(
+                        "https://play.google.com/store/apps/details?id=com.example.android"
+                    )
+                    setPackage("com.android.vending")
+                }
+                startActivity(intent)
+//                val i = Intent(Intent.ACTION_VIEW)
+//                val appPackageName = packageName // getPackageName() from Context or Activity object
+//                try {
+//                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$appPackageName")))
+//                } catch (anfe: android.content.ActivityNotFoundException) {
+//                    startActivity(
+//                        Intent(
+//                            Intent.ACTION_VIEW,
+//                            Uri.parse("https://play.google.com/store/apps/details?id=$appPackageName")
+//                        )
+//                    )
+//                }
+//
+//                startActivity(i)
+            }
+            R.id.together -> {
+                val intent = Intent(Intent.ACTION_VIEW).setData(Uri.parse("http://www.bebediary.co.kr/app/partner/"))
+                startActivity(intent)
             }
         }
 
