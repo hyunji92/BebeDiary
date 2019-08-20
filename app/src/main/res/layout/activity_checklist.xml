@@ -1,89 +1,119 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:background="#ffffff"
-        tools:context=".MainActivity">
-
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#ffffff"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
 
     <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar_top"
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            android:minHeight="?attr/actionBarSize"
-            android:background="#ffffff"
-            app:theme="@style/Widget.AppCompat.Toolbar">
+        android:id="@+id/toolbar_top"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#ffffff"
+        android:minHeight="?attr/actionBarSize"
+        app:theme="@style/Widget.AppCompat.Toolbar">
+
         <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"
                 android:orientation="horizontal">
 
-            <LinearLayout
+                <androidx.appcompat.widget.AppCompatImageButton
+                    android:id="@+id/back_button"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/ic_arrow_back_1"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center_vertical" />
+
+                <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_centerVertical="true"
-                    android:layout_alignParentStart="true">
-                <ImageButton
-                        android:id="@+id/back_button"
-                        android:layout_width="38dp"
-                        android:layout_height="38dp"
-                        android:gravity="center_vertical"
-                        android:layout_marginRight="5dp"
-                        android:layout_gravity="center_vertical"
-                        android:clickable="true"
-                        android:background="@drawable/ic_arrow_back_1"/>
-                <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="체크리스트"
-                        android:textSize="20sp"
-                        android:gravity="center_vertical"
-                        android:layout_gravity="center_vertical"
-                        android:textColor="@color/registerPopupTextColor"/>
+                    android:layout_gravity="center_vertical"
+                    android:gravity="center_vertical"
+                    android:text="체크리스트"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
 
             </LinearLayout>
 
-
             <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical|end"
-                    android:layout_alignParentEnd="true"
-                    android:layout_marginTop="0dp"
-                    android:layout_alignParentTop="true"
-                    android:padding="10dp">
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="0dp"
+                android:layout_marginEnd="16dp"
+                android:gravity="center_vertical|end"
+                android:orientation="horizontal">
 
-                <ImageButton
-                        android:id="@+id/add_memo_button"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:background="@drawable/memo_add"/>
-                <ImageButton
-                        android:id="@+id/delete_memo_button"
-                        android:layout_width="35dp"
-                        android:layout_height="35dp"
-                        android:clickable="true"
-                        android:background="@drawable/memo_delete"/>
+                <androidx.appcompat.widget.AppCompatImageButton
+                    android:id="@+id/add_memo_button"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_marginStart="8dp"
+                    android:backgroundTint="@android:color/transparent"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?selectableItemBackgroundBorderless"
+                    android:padding="4dp"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/memo_add" />
+
+                <androidx.appcompat.widget.AppCompatImageButton
+                    android:id="@+id/delete_memo_button"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_marginStart="8dp"
+                    android:backgroundTint="@android:color/transparent"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?selectableItemBackgroundBorderless"
+                    android:padding="4dp"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/memo_delete" />
             </LinearLayout>
         </RelativeLayout>
-
     </androidx.appcompat.widget.Toolbar>
 
-    // 채크 리스트
-    <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/check_recycler_view"
-            android:layout_width="match_parent"
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FFEEEFEF"
+        android:minHeight="48dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp">
+
+        <Spinner
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:visibility="visible"
-            tools:visibility="visible"/>
+            android:layout_gravity="center_vertical"
+            tools:listitem="@android:layout/simple_list_item_1" />
+    </FrameLayout>
 
-
+    <!-- 채크 리스트-->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/check_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="visible"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        tools:visibility="visible" />
 </LinearLayout>

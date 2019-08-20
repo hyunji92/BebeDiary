@@ -1,4 +1,4 @@
-package com.hyundeee.app.wingsui.adapter
+package com.bebediary.checklist.adapter
 
 import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
@@ -10,7 +10,7 @@ import kotlinx.android.synthetic.main.check_list_header.view.*
 import kotlinx.android.synthetic.main.check_list_item.view.*
 
 
-class CheckListAdapter : androidx.recyclerview.widget.RecyclerView.Adapter<androidx.recyclerview.widget.RecyclerView.ViewHolder>() {
+class CheckListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     lateinit var onItemClickListener: AdapterView.OnItemClickListener
 
@@ -86,7 +86,7 @@ class CheckListAdapter : androidx.recyclerview.widget.RecyclerView.Adapter<andro
         }
     }
 
-    override fun onBindViewHolder(holder: androidx.recyclerview.widget.RecyclerView.ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
 
         if (holder is EarlyPregnantHeaderViewHolder) {
             holder.run {
@@ -103,7 +103,7 @@ class CheckListAdapter : androidx.recyclerview.widget.RecyclerView.Adapter<andro
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): androidx.recyclerview.widget.RecyclerView.ViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         when (viewType) {
             EARLY_HEADER -> {
                 val view = LayoutInflater.from(parent.context).inflate(R.layout.check_list_header, parent, false)
@@ -126,14 +126,14 @@ class CheckListAdapter : androidx.recyclerview.widget.RecyclerView.Adapter<andro
 
     override fun getItemCount(): Int = earlyCheckList.size + 2
 
-    inner class EarlyPregnantHeaderViewHolder(itemView: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(itemView) {
+    inner class EarlyPregnantHeaderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         fun bindView(title: String) {
             with(itemView) {
                 pregnant_period.text = title
             }
         }
     }
-    inner class MidPregnantHeaderViewHolder(itemView: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(itemView) {
+    inner class MidPregnantHeaderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         fun bindView(title: String) {
             with(itemView) {
                 pregnant_period.text = title
@@ -141,7 +141,7 @@ class CheckListAdapter : androidx.recyclerview.widget.RecyclerView.Adapter<andro
         }
     }
 
-    inner class EarlyPregnantViewHolder(itemView: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(itemView) {
+    inner class EarlyPregnantViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         fun bindView(earlyChecklistItem: String) {
             with(itemView) {
                 check_list_text.text = earlyChecklistItem

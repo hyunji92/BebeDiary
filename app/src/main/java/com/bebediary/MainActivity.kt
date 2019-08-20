@@ -19,6 +19,7 @@ import com.bebediary.baby.change.BabyChangeActivity
 import com.bebediary.calendar.CalendarFragment
 import com.bebediary.camera.CameraResultActivity
 import com.bebediary.camera.CameraWrapperActivity
+import com.bebediary.checklist.CheckListActivity
 import com.bebediary.database.entity.Sex
 import com.bebediary.database.model.BabyModel
 import com.bebediary.database.model.DiaryModel
@@ -84,7 +85,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         when (item.itemId) {
             R.id.navigation_camera -> openBabyCamera()
             R.id.navigation_calendar -> replaceToCalendar()
-            R.id.navigation_checklist -> Log.d("Main", "CheckList")
+            R.id.navigation_checklist -> openCheckList()
             R.id.navigation_information -> replaceToInformation()
             R.id.navigation_memo -> openNoteList()
         }
@@ -352,6 +353,16 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private fun openBabyCamera() {
         val intent = Intent(this, CameraWrapperActivity::class.java)
         startActivityForResult(intent, Constants.requestCameraCode)
+    }
+
+    /**
+     * 체크 리스트 화면 열기
+     */
+    private fun openCheckList() {
+        val babyId = currentBabyModel?.baby?.id ?: return
+        val intent = Intent(this@MainActivity, CheckListActivity::class.java)
+        intent.putExtra("babyId", babyId)
+        startActivity(intent)
     }
 
     /**
