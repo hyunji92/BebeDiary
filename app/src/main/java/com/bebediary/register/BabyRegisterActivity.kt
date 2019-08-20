@@ -22,6 +22,7 @@ import com.bebediary.database.entity.Attachment
 import com.bebediary.database.entity.Baby
 import com.bebediary.database.entity.Sex
 import com.bebediary.util.Constants
+import com.bebediary.util.extension.format
 import com.bebediary.util.extension.toAttachment
 import com.gun0912.tedpermission.PermissionListener
 import com.gun0912.tedpermission.TedPermission
@@ -125,11 +126,11 @@ class BabyRegisterActivity : Activity() {
      */
     private fun showPickPhotoDialog() {
         AlertDialog.Builder(this)
-                .setTitle("사진등록")
-                .setItems(arrayOf("카메라", "갤러리")) { _, id ->
-                    if (id == 0) takePhoto() else goToAlbum()
-                }
-                .show()
+            .setTitle("사진등록")
+            .setItems(arrayOf("카메라", "갤러리")) { _, id ->
+                if (id == 0) takePhoto() else goToAlbum()
+            }
+            .show()
     }
 
     /**
@@ -154,15 +155,15 @@ class BabyRegisterActivity : Activity() {
         // 이미지 저장 및 설정
         val attachmentDao = db.attachmentDao()
         attachment
-                .flatMap { attachmentDao.insert(it) }
-                .flatMap { id -> db.attachmentDao().getById(id) }
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        { invalidatePhotoView(it) },
-                        { it.printStackTrace() }
-                )
-                .apply { compositeDisposable.add(this) }
+            .flatMap { attachmentDao.insert(it) }
+            .flatMap { id -> db.attachmentDao().getById(id) }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                { invalidatePhotoView(it) },
+                { it.printStackTrace() }
+            )
+            .apply { compositeDisposable.add(this) }
     }
 
     /**
@@ -196,10 +197,10 @@ class BabyRegisterActivity : Activity() {
 
         // 이미지 로딩
         GlideApp.with(this)
-                .load(attachment.file)
-                .centerCrop()
-                .circleCrop()
-                .into(baby_image)
+            .load(attachment.file)
+            .centerCrop()
+            .circleCrop()
+            .into(baby_image)
     }
 
     /**
@@ -220,7 +221,7 @@ class BabyRegisterActivity : Activity() {
      * 생일 혹은 출산 예정일 업데이트
      */
     private fun invalidateEventDate() {
-        baby_birthday.text = String.format("%02d.%02d.%02d", year, month, day)
+        baby_birthday.text = eventCalendar.time.format("YYYY.MM.dd")
     }
 
     /**
@@ -228,19 +229,19 @@ class BabyRegisterActivity : Activity() {
      */
     private fun tedPermission() {
         TedPermission.with(this)
-                .setPermissionListener(object : PermissionListener {
-                    override fun onPermissionGranted() {
-                        hasPhotoPermission = true
-                    }
+            .setPermissionListener(object : PermissionListener {
+                override fun onPermissionGranted() {
+                    hasPhotoPermission = true
+                }
 
-                    override fun onPermissionDenied(deniedPermissions: ArrayList<String>) {
-                        hasPhotoPermission = false
-                    }
-                })
-                .setRationaleMessage(resources.getString(R.string.permission_2))
-                .setDeniedMessage(resources.getString(R.string.permission_1))
-                .setPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA)
-                .check()
+                override fun onPermissionDenied(deniedPermissions: ArrayList<String>) {
+                    hasPhotoPermission = false
+                }
+            })
+            .setRationaleMessage(resources.getString(R.string.permission_2))
+            .setDeniedMessage(resources.getString(R.string.permission_1))
+            .setPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA)
+            .check()
     }
 
     /**
@@ -275,26 +276,26 @@ class BabyRegisterActivity : Activity() {
 
         // 아이 정보 생성
         val baby = Baby(
-                name = baby_name.text.toString(),
-                sex = if (babyRegisterMale.isChecked) Sex.Male else Sex.Female,
-                photoId = photo?.id ?: throw IllegalStateException("사진 아이디가 존재하지 않습니다"),
-                isPregnant = isPregnant,
-                birthday = if (isPregnant) null else eventCalendar.time,
-                babyDueDate = if (isPregnant) eventCalendar.time else null,
-                isSelected = isEdit.not()
+            name = baby_name.text.toString(),
+            sex = if (babyRegisterMale.isChecked) Sex.Male else Sex.Female,
+            photoId = photo?.id ?: throw IllegalStateException("사진 아이디가 존재하지 않습니다"),
+            isPregnant = isPregnant,
+            birthday = if (isPregnant) null else eventCalendar.time,
+            babyDueDate = if (isPregnant) eventCalendar.time else null,
+            isSelected = isEdit.not()
         )
 
         // 데이터 입력
         db.babyDao().insert(baby)
-                .subscribeOn(Schedulers.io())
-                .subscribe(
-                        { finish() },
-                        {
-                            Toast.makeText(this, "아이 데이터 생성에 실패하였습니다", Toast.LENGTH_SHORT).show()
-                            it.printStackTrace()
-                        }
-                )
-                .apply { compositeDisposable.add(this) }
+            .subscribeOn(Schedulers.io())
+            .subscribe(
+                { finish() },
+                {
+                    Toast.makeText(this, "아이 데이터 생성에 실패하였습니다", Toast.LENGTH_SHORT).show()
+                    it.printStackTrace()
+                }
+            )
+            .apply { compositeDisposable.add(this) }
     }
 
     /**
@@ -309,13 +310,14 @@ class BabyRegisterActivity : Activity() {
         else this
 
         // 다이얼로그 보여줌
-        DatePickerDialog(context, { _, year, month, day ->
+        DatePickerDialog(
+            context, { _, year, month, day ->
 
-            // 이벤트 정보 업데이트
-            this.year = year
-            this.month = month
-            this.day = day
-        }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)
+                // 이벤트 정보 업데이트
+                this.year = year
+                this.month = month
+                this.day = day
+            }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)
         ).show()
     }
 }
