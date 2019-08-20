@@ -113,10 +113,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                // 아가 사진 없을 때, 등록하세요
-                // 아기 사진 없이 등록했을 때 보이는거
-                // 보여야 하는거
-
+                <!-- 아가 사진 없을 때, 등록하세요-->
+                <!-- 아기 사진 없이 등록했을 때 보이는거-->
+                <!-- 보여야 하는거-->
                 <LinearLayout
                     android:id="@+id/no_register_baby_image_layout"
                     android:layout_width="match_parent"
@@ -144,9 +143,9 @@
                         android:textSize="32sp" />
 
                 </LinearLayout>
-                // 리얼 사진, 사진 있으면 보여야 하는거
-                // 보여야 하는거
 
+                <!-- 리얼 사진, 사진 있으면 보여야 하는거-->
+                <!-- 보여야 하는거-->
                 <ImageView
                     android:id="@+id/real_baby_image"
                     android:layout_width="match_parent"
@@ -173,127 +172,147 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <LinearLayout
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/main_top_layout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/main_top_layout"
-                    android:orientation="vertical"
                     android:visibility="gone"
                     tools:visibility="visible">
 
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="right"
-                        android:layout_marginTop="18dp"
-                        android:layout_marginRight="50dp"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <androidx.appcompat.widget.AppCompatTextView
-                            android:id="@+id/BabyNameView"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textColor="@android:color/white"
-                            android:textSize="24sp"
-                            android:textStyle="bold"
-                            app:autoSizeMinTextSize="12sp"
-                            app:autoSizeTextType="uniform"
-                            tools:text="동동이" />
-
-                        <androidx.appcompat.widget.AppCompatImageView
-                            android:id="@+id/BabyGenderView"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="bottom"
-                            android:layout_marginStart="4dp"
-                            app:srcCompat="@drawable/noti_icon" />
-
-                        <androidx.appcompat.widget.AppCompatTextView
-                            android:id="@+id/BabyBirthView"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="bottom"
-                            android:layout_marginStart="8dp"
-                            android:textColor="@android:color/white"
-                            android:textSize="12sp"
-                            tools:text="@tools:sample/date/ddmmyy" />
-                    </LinearLayout>
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/main_top_layout"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
 
                     <LinearLayout
-                        android:layout_width="200dp"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="right"
-                        android:layout_marginTop="4dp"
-                        android:layout_marginBottom="4dp"
-                        android:orientation="vertical">
-
-                        <androidx.appcompat.widget.AppCompatTextView
-                            android:id="@+id/BabyDescriptionView"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:lineSpacingExtra="-4sp"
-                            android:textColor="@android:color/white"
-                            android:textSize="13sp"
-                            tools:maxLines="2"
-                            tools:text="@tools:sample/lorem/random" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="right"
-                        android:layout_marginRight="40dp"
-                        android:layout_marginBottom="5dp"
-                        android:orientation="vertical">
-
-
-                        <ImageView
-                            android:id="@+id/dust_img"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="end"
-                            android:layout_marginRight="8dp"
-                            android:background="@drawable/dust_good" />
+                        android:orientation="vertical"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintWidth_percent="0.5">
 
                         <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:background="@drawable/dust_info_bg"
+                            android:layout_marginTop="18dp"
+                            android:gravity="center_vertical"
                             android:orientation="horizontal">
 
-                            <TextView
-                                android:id="@+id/dust_location_text"
+                            <androidx.appcompat.widget.AppCompatTextView
+                                android:id="@+id/BabyNameView"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:padding="4dp"
-                                android:text="서울 특별시"
-                                android:textAlignment="center"
+                                android:textColor="@android:color/white"
+                                android:textSize="24sp"
+                                android:textStyle="bold"
+                                app:autoSizeMinTextSize="12sp"
+                                app:autoSizeTextType="uniform"
+                                tools:text="동동이" />
+
+                            <androidx.appcompat.widget.AppCompatImageView
+                                android:id="@+id/BabyGenderView"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="bottom"
+                                android:layout_marginStart="4dp"
+                                app:srcCompat="@drawable/noti_icon" />
+
+                            <androidx.appcompat.widget.AppCompatTextView
+                                android:id="@+id/BabyBirthView"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="bottom"
+                                android:layout_marginStart="8dp"
+                                android:textColor="@android:color/white"
                                 android:textSize="12sp"
-                                android:textStyle="bold" />
-
-                            <TextView
-                                android:id="@+id/dust_text"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:padding="4dp"
-                                android:text="| 미세먼지 좋음"
-                                android:textAlignment="center"
-                                android:textSize="12sp" />
-
-
+                                tools:text="@tools:sample/date/ddmmyy" />
                         </LinearLayout>
 
-                        <TextView
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:layout_marginBottom="4dp"
+                            android:orientation="vertical">
+
+                            <androidx.appcompat.widget.AppCompatTextView
+                                android:id="@+id/BabyDescriptionView"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:lineSpacingExtra="-4sp"
+                                android:textColor="@android:color/white"
+                                android:textSize="13sp"
+                                tools:maxLines="2"
+                                tools:text="@tools:sample/lorem/random" />
+                        </LinearLayout>
+
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="right"
-                            android:text="출저 : 한국환경공단"
-                            android:textSize="7sp" />
-                    </LinearLayout>
-                </LinearLayout>
+                            android:layout_gravity="end"
+                            android:layout_marginTop="4dp"
+                            android:layout_marginBottom="18dp"
+                            android:orientation="vertical">
 
+                            <androidx.appcompat.widget.AppCompatImageView
+                                android:id="@+id/dust_img"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="end"
+                                android:layout_marginEnd="8dp"
+                                android:background="@drawable/dust_good" />
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/dust_info_bg"
+                                android:gravity="center"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    android:id="@+id/dust_location_text"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:paddingStart="8dp"
+                                    android:paddingEnd="4dp"
+                                    android:text="서울 특별시"
+                                    android:textAlignment="center"
+                                    android:textSize="12sp"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="|"
+                                    android:textSize="12sp" />
+
+                                <TextView
+                                    android:id="@+id/dust_text"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:paddingStart="4dp"
+                                    android:paddingEnd="8dp"
+                                    android:text="미세먼지 좋음"
+                                    android:textAlignment="center"
+                                    android:textSize="12sp" />
+                            </LinearLayout>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="end"
+                                android:text="출저 : 한국환경공단"
+                                android:textSize="7sp" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <!-- 임신 상태 정보 그룹 레이아웃 -->
                 <LinearLayout
@@ -501,7 +520,5 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:menu="@menu/bottom_nav_menu" />
-
-
 </androidx.constraintlayout.widget.ConstraintLayout>
 
