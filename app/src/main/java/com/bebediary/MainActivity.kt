@@ -1,10 +1,7 @@
 package com.bebediary
 
-import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
@@ -30,6 +27,8 @@ import com.bebediary.main.adapter.IncomingDiaryAdapter
 import com.bebediary.memo.NoteListActivity
 import com.bebediary.register.BabyRegisterActivity
 import com.bebediary.util.Constants
+import com.bebediary.util.extension.eventDateToText
+import com.bebediary.util.extension.format
 import com.bebediary.whitenoise.WhiteNoiseActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationView
@@ -39,16 +38,11 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.contents_main.*
-import kotlinx.android.synthetic.main.header_navigatioin.*
-import java.text.SimpleDateFormat
+import kotlinx.android.synthetic.main.header_navigatioin.view.*
 import java.util.*
-import java.util.concurrent.TimeUnit
-import kotlin.math.abs
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, LifecycleObserver,
     IncomingDiaryAdapter.OnItemChangeListener {
-
-    lateinit var drawerToggle: ActionBarDrawerToggle
 
     // Composite Disposable
     private val compositeDisposable = CompositeDisposable()
@@ -65,115 +59,98 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     // Incoming Diary Adapter
     private val incomingDiaryAdapter by lazy { IncomingDiaryAdapter(this) }
 
-    lateinit var prefs: SharedPreferences
-    lateinit var editor: SharedPreferences.Editor
-
-    private val fragmentManager = supportFragmentManager
-
+    // Fragments
     private val calendarFragment = CalendarFragment()
     private val infoFragment = InfoFragment()
 
-    private val onNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
-
-        // 아이가 선택되어 있어야만 아래의 모든 작업을 할 수 있으므로 아이가 선택되어있지 않으면 리턴
-        val babyId = currentBabyModel?.baby?.id
-            ?: return@OnNavigationItemSelectedListener false
-
-        val transaction = fragmentManager.beginTransaction()
-        when (item.itemId) {
-            R.id.navigation_camera -> {
-                openBabyCamera()
-                return@OnNavigationItemSelectedListener true
-            }
-            R.id.navigation_calendar -> {
-                Log.d("test", "test calendar")
-                main_all_Scrollview.visibility = View.GONE
-                frame_layout.visibility = View.VISIBLE
-                transaction.replace(R.id.frame_layout, calendarFragment).commitAllowingStateLoss()
-                return@OnNavigationItemSelectedListener true
-            }
-            R.id.navigation_checklist -> {
-                Log.d("test", "test checklist")
-                return@OnNavigationItemSelectedListener true
-            }
-            R.id.navigation_information -> {
-                Log.d("test", "test information")
-                main_all_Scrollview.visibility = View.GONE
-                frame_layout.visibility = View.VISIBLE
-                transaction.replace(R.id.frame_layout, infoFragment).commitAllowingStateLoss()
-                return@OnNavigationItemSelectedListener true
-            }
-            R.id.navigation_memo -> {
-                val intent = Intent(this@MainActivity, NoteListActivity::class.java)
-                intent.putExtra("babyId", babyId)
-                startActivity(intent)
-
-                return@OnNavigationItemSelectedListener true
-            }
-        }
-
-        false
-    }
-
-    override fun onBackPressed() {
-        super.onBackPressed()
-        if (dl_main_drawer_root.isDrawerOpen(GravityCompat.START)) {
-            dl_main_drawer_root.closeDrawer(GravityCompat.START)
-        } else {
-            super.onBackPressed()
-        }
-
-    }
-
-    override fun onPostCreate(savedInstanceState: Bundle?) {
-        super.onPostCreate(savedInstanceState)
-        drawerToggle.syncState()
-
-
-    }
-
-    override fun onConfigurationChanged(newConfig: Configuration?) {
-        super.onConfigurationChanged(newConfig)
-        drawerToggle.onConfigurationChanged(newConfig)
-
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        if (drawerToggle.onOptionsItemSelected(item)) {
-            return true
-        }
-        return super.onOptionsItemSelected(item)
-    }
-
-    @SuppressLint("CheckResult")
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-
-        val navView: BottomNavigationView = findViewById(R.id.nav_view)
-        navView.apply {
-            isItemHorizontalTranslationEnabled = false
-            setOnNavigationItemSelectedListener(onNavigationItemSelectedListener)
-        }
-
-        drawerToggle = ActionBarDrawerToggle(
+    // Drawer Toggle
+    private val drawerToggle by lazy {
+        ActionBarDrawerToggle(
             this,
             dl_main_drawer_root,
             toolbar,
             R.string.drawer_open,
             R.string.drawer_close
         )
-        dl_main_drawer_root.addDrawerListener(drawerToggle)
-        // 메인 네비게이션 클릭 리스너
-        nv_main_navigation_root.setNavigationItemSelectedListener(this)
+    }
 
-        prefs = getSharedPreferences("baby_info", Context.MODE_PRIVATE)
-        editor = prefs.edit()
+    // 하단 네비게이션 리스너
+    private val bottomNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
 
-        babyInfoSetting()
+        // 아이가 선택되어 있어야만 아래의 모든 작업을 할 수 있으므로 아이가 선택되어있지 않으면 리턴
+        currentBabyModel?.baby?.id ?: return@OnNavigationItemSelectedListener false
+
+        // 아이디에 해당하는 액션 실행
+        when (item.itemId) {
+            R.id.navigation_camera -> openBabyCamera()
+            R.id.navigation_calendar -> replaceToCalendar()
+            R.id.navigation_checklist -> Log.d("Main", "CheckList")
+            R.id.navigation_information -> replaceToInformation()
+            R.id.navigation_memo -> openNoteList()
+        }
+
+        true
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
 
         // Lifecycle Observer
         lifecycle.addObserver(this)
+    }
+
+    /**
+     * 뷰 기본 동작 설정
+     */
+    @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
+    fun initializeView() {
+
+        // 기본 뷰 설정 ( 아이 추가 뷰 설정, 이미지 숨기기 버튼 숨김 )
+        first_add_baby_layout.isVisible = true
+        main_image_off_button.isVisible = false
+
+        // 아이 추가 뷰 리스너
+        add_baby.setOnClickListener {
+            startActivity(Intent(this, BabyRegisterActivity::class.java))
+        }
+
+        // Navigation View 설정
+        nav_view.isItemHorizontalTranslationEnabled = false
+        nav_view.setOnNavigationItemSelectedListener(bottomNavigationItemSelectedListener)
+
+        // Drawer Layout 설정
+        dl_main_drawer_root.addDrawerListener(drawerToggle)
+
+        // 메인 네비게이션 클릭 리스너
+        nv_main_navigation_root.setNavigationItemSelectedListener(this)
+
+        // 메인 이미지 숨기는 뷰
+        main_image_off_button.setOnClickListener {
+            val isOpen = it.tag as? Boolean == true
+            main_image_off_button.setBackgroundResource(if (isOpen) R.drawable.main_image_on else R.drawable.main_image_off)
+            no_register_baby_image_layout.isVisible = isOpen
+            real_baby_image.isVisible = isOpen
+
+            // 태그 업데이트
+            it.tag = isOpen.not()
+        }
+
+        // 홈 버튼 눌렀을때 홈화면으로 이동
+        go_to_home.setOnClickListener {
+            main_all_Scrollview.isVisible = true
+            frame_layout.isVisible = false
+        }
+
+        // 백색 소음 화면으로 이동
+        white_nois.setOnClickListener {
+            val intent = Intent(this, WhiteNoiseActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK and Intent.FLAG_ACTIVITY_CLEAR_TASK and Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            startActivity(intent)
+        }
+
+        // RecyclerView Adapter
+        mainIncomingDiaryRecyclerView.adapter = incomingDiaryAdapter
     }
 
     /**
@@ -205,38 +182,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 { it.printStackTrace() }
             )
             .apply { compositeDisposable.add(this) }
-    }
-
-    /**
-     * 뷰 기본 동작 설정
-     */
-    @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
-    fun initializeView() {
-        main_image_off_button.setOnClickListener {
-            val isOpen = it.tag as? Boolean == true
-            main_image_off_button.setBackgroundResource(if (isOpen) R.drawable.main_image_on else R.drawable.main_image_off)
-            no_register_baby_image_layout.isVisible = isOpen
-            real_baby_image.isVisible = isOpen
-
-            // 태그 업데이트
-            it.tag = isOpen.not()
-        }
-
-        // 홈 버튼 눌렀을때 홈화면으로 이동
-        go_to_home.setOnClickListener {
-            main_all_Scrollview.isVisible = true
-            frame_layout.isVisible = false
-        }
-
-        // 백색 소음 화면으로 이동
-        white_nois.setOnClickListener {
-            val intent = Intent(this, WhiteNoiseActivity::class.java)
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK and Intent.FLAG_ACTIVITY_CLEAR_TASK and Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            startActivity(intent)
-        }
-
-        // RecyclerView Adapter
-        mainIncomingDiaryRecyclerView.adapter = incomingDiaryAdapter
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
@@ -282,35 +227,21 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             ?: return
 
         // 생일 뷰 설정
-        val dateFormat = SimpleDateFormat("YYYY.MM.dd", Locale.getDefault())
-        BabyBirthView.text = dateFormat.format(eventDate)
-
-        // 오늘 날짜 정보
-        val today = Calendar.getInstance()
+        BabyBirthView.text = eventDate.format("YYYY.MM.dd")
 
         // 아이 설명 뷰 설정
-        if (babyModel.baby.isPregnant) {
-            is_pregnant_layout.visibility = View.VISIBLE
-            BabyDescriptionView.text = "만 1세 5개월 (142)일\n태어난지 507일"
-        } else {
-            // 태어난 후 오늘까지 몇일이 지났는지
-            val diffDay = TimeUnit.MILLISECONDS.toDays(abs(today.timeInMillis - eventDate.time))
-
-            // 나이 만나이 계산 (태어난 이후 날짜 / 366)
-            val age = (diffDay / 365)
-
-            // 개월 수
-            val monthToDays = diffDay % 365
-            val month = diffDay % 365 / 30
-
-            BabyDescriptionView.text = "만 ${age}세 ${month}개월 ($monthToDays)일\n태어난지 ${diffDay}일"
-        }
+        BabyDescriptionView.text = babyModel.baby.eventDateToText()
     }
 
     /**
      * Navigation Header 업데이트
      */
     private fun invalidateNavigationHeader(babyModel: BabyModel) {
+        val headerView = nv_main_navigation_root.getHeaderView(0)
+        val navigationHeaderImage = headerView.navigationHeaderImage
+        val navigationHeaderName = headerView.navigationHeaderName
+
+        // 이미지 설정
         GlideApp.with(navigationHeaderImage)
             .load(babyModel.photos.first().file)
             .centerCrop()
@@ -381,56 +312,38 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             .apply { compositeDisposable.add(this) }
     }
 
-    private fun babyInfoSetting() {
-        var name = prefs.getString("baby_name", "")
-        if (name == "" || name == null) {
-            // 아무 정보 없을 때
-            first_add_baby_layout.visibility = View.VISIBLE
-            main_image_off_button.visibility = View.GONE
-
-            add_baby.apply {
-                setOnClickListener {
-                    val intent = Intent(this@MainActivity, BabyRegisterActivity::class.java)
-                    //intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK and Intent.FLAG_ACTIVITY_CLEAR_TASK and Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                    startActivity(intent)
-                }
-            }
-        } else {
-            // 아기 정보 생겼을 때
-            haveBabyInfoLayoutSet()
-        }
+    /**
+     * 캘린더 화면으로 변경
+     */
+    private fun replaceToCalendar() {
+        main_all_Scrollview.visibility = View.GONE
+        frame_layout.visibility = View.VISIBLE
+        supportFragmentManager
+            .beginTransaction()
+            .replace(R.id.frame_layout, calendarFragment)
+            .commitAllowingStateLoss()
     }
 
-    fun haveBabyInfoLayoutSet() {
-        first_add_baby_layout.visibility = View.GONE
-        main_image_off_button.visibility = View.VISIBLE
-        // 사진 등록 , 사진 Uri 있음
-        var profile = prefs.getString("image", null)
-        if (profile == null) {
-            no_register_baby_image_layout.visibility = View.VISIBLE
-        } else {
-            real_baby_image.visibility = View.VISIBLE
-            real_baby_image.setImageURI(Uri.parse(profile))
-        }
-        main_top_layout.visibility = View.VISIBLE
-        comming_schedule_layout.visibility = View.VISIBLE
+    /**
+     * 정보 보여주는 화면으로 변경
+     */
+    private fun replaceToInformation() {
+        main_all_Scrollview.visibility = View.GONE
+        frame_layout.visibility = View.VISIBLE
+        supportFragmentManager
+            .beginTransaction()
+            .replace(R.id.frame_layout, infoFragment)
+            .commitAllowingStateLoss()
+    }
 
-        var imageOn = false
-        main_image_off_button.setOnClickListener {
-            if (imageOn) {
-                Log.d("test", "test Image On$imageOn")
-                main_image_off_button.setBackgroundResource(R.drawable.main_image_off)
-                no_register_baby_image_layout.visibility = View.GONE
-                real_baby_image.visibility = View.GONE
-                imageOn = false
-            } else {
-                Log.d("test", "test Image Off$imageOn")
-                main_image_off_button.setBackgroundResource(R.drawable.main_image_on)
-                no_register_baby_image_layout.visibility = View.VISIBLE
-                real_baby_image.visibility = View.VISIBLE
-                imageOn = true
-            }
-        }
+    /**
+     * 메모 화면 열기
+     */
+    private fun openNoteList() {
+        val babyId = currentBabyModel?.baby?.id ?: return
+        val intent = Intent(this@MainActivity, NoteListActivity::class.java)
+        intent.putExtra("babyId", babyId)
+        startActivity(intent)
     }
 
     /**
@@ -476,11 +389,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 startActivity(Intent(this, BabyChangeActivity::class.java))
             }
             R.id.guide -> {
-                val intent = Intent(Intent.ACTION_VIEW).setData(Uri.parse("http://www.bebediary.co.kr/app/guide/"))
+                val intent = Intent(Intent.ACTION_VIEW)
+                    .setData(Uri.parse("http://www.bebediary.co.kr/app/guide/"))
                 startActivity(intent)
             }
             R.id.pregnant_guide -> {
-                val intent = Intent(Intent.ACTION_VIEW).setData(Uri.parse("http://www.bebediary.co.kr/app/baby_info/"))
+                val intent = Intent(Intent.ACTION_VIEW)
+                    .setData(Uri.parse("http://www.bebediary.co.kr/app/baby_info/"))
                 startActivity(intent)
             }
             R.id.review -> {
@@ -508,11 +423,42 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 //                startActivity(i)
             }
             R.id.together -> {
-                val intent = Intent(Intent.ACTION_VIEW).setData(Uri.parse("http://www.bebediary.co.kr/app/partner/"))
+                val intent = Intent(Intent.ACTION_VIEW)
+                    .setData(Uri.parse("http://www.bebediary.co.kr/app/partner/"))
                 startActivity(intent)
             }
         }
 
         return false
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        if (dl_main_drawer_root.isDrawerOpen(GravityCompat.START)) {
+            dl_main_drawer_root.closeDrawer(GravityCompat.START)
+        } else {
+            super.onBackPressed()
+        }
+
+    }
+
+    override fun onPostCreate(savedInstanceState: Bundle?) {
+        super.onPostCreate(savedInstanceState)
+        drawerToggle.syncState()
+
+
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration?) {
+        super.onConfigurationChanged(newConfig)
+        drawerToggle.onConfigurationChanged(newConfig)
+
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        if (drawerToggle.onOptionsItemSelected(item)) {
+            return true
+        }
+        return super.onOptionsItemSelected(item)
     }
 }
