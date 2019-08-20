@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:name=".MyApplication"
@@ -40,6 +41,7 @@
         <activity android:name=".baby.change.BabyChangeActivity" />
         <activity android:name=".camera.CameraWrapperActivity" />
         <activity android:name=".camera.CameraResultActivity" />
+        <activity android:name=".whitenoise.WhiteNoiseActivity"/>
 
         <!-- 사진 촬영을 위한 provide -->
         <provider

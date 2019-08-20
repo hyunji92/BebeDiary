@@ -16,6 +16,13 @@
                 android:icon="@drawable/pregnant_info_icon"
                 android:title="임신/출산정보"
         />
+
+        <item
+            android:id="@+id/review"
+            android:icon="@drawable/review"
+            android:title="앱 평가하기"
+            />
+
         <item
                 android:id="@+id/together"
                 android:icon="@drawable/together_icon"

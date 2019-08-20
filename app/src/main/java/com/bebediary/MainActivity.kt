@@ -22,12 +22,15 @@ import com.bebediary.baby.change.BabyChangeActivity
 import com.bebediary.calendar.CalendarFragment
 import com.bebediary.camera.CameraResultActivity
 import com.bebediary.camera.CameraWrapperActivity
+import com.bebediary.database.entity.Sex
 import com.bebediary.database.model.BabyModel
 import com.bebediary.database.model.DiaryModel
+import com.bebediary.info.InfoFragment
 import com.bebediary.main.adapter.IncomingDiaryAdapter
 import com.bebediary.memo.NoteListActivity
 import com.bebediary.register.BabyRegisterActivity
 import com.bebediary.util.Constants
+import com.bebediary.whitenoise.WhiteNoiseActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationView
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -37,9 +40,13 @@ import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.contents_main.*
 import kotlinx.android.synthetic.main.header_navigatioin.*
+import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.TimeUnit
+import kotlin.math.abs
 
-class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, LifecycleObserver, IncomingDiaryAdapter.OnItemChangeListener {
+class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, LifecycleObserver,
+    IncomingDiaryAdapter.OnItemChangeListener {
 
     lateinit var drawerToggle: ActionBarDrawerToggle
 
@@ -64,12 +71,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private val fragmentManager = supportFragmentManager
 
     private val calendarFragment = CalendarFragment()
+    private val infoFragment = InfoFragment()
 
     private val onNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
 
         // 아이가 선택되어 있어야만 아래의 모든 작업을 할 수 있으므로 아이가 선택되어있지 않으면 리턴
         val babyId = currentBabyModel?.baby?.id
-                ?: return@OnNavigationItemSelectedListener false
+            ?: return@OnNavigationItemSelectedListener false
 
         val transaction = fragmentManager.beginTransaction()
         when (item.itemId) {
@@ -81,7 +89,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 Log.d("test", "test calendar")
                 main_all_Scrollview.visibility = View.GONE
                 frame_layout.visibility = View.VISIBLE
-                transaction.replace(R.id.frame_layout, calendarFragment).commitAllowingStateLoss();
+                transaction.replace(R.id.frame_layout, calendarFragment).commitAllowingStateLoss()
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_checklist -> {
@@ -90,6 +98,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
             R.id.navigation_information -> {
                 Log.d("test", "test information")
+                main_all_Scrollview.visibility = View.GONE
+                frame_layout.visibility = View.VISIBLE
+                transaction.replace(R.id.frame_layout, infoFragment).commitAllowingStateLoss()
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_memo -> {
@@ -133,6 +144,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
         return super.onOptionsItemSelected(item)
     }
+
     @SuppressLint("CheckResult")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -171,28 +183,28 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun fetchCurrentBaby() {
         db.babyDao().getSelected()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        {
-                            // Drawer에 아이 정보 업데이트
-                            invalidateNavigationHeader(it)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                {
+                    // Drawer에 아이 정보 업데이트
+                    invalidateNavigationHeader(it)
 
-                            // 아이 뷰 업데이트
-                            invalidateBabyView(it)
+                    // 아이 뷰 업데이트
+                    invalidateBabyView(it)
 
-                            // 다이어리 업데이트
-                            fetchDiaries(it)
+                    // 다이어리 업데이트
+                    fetchDiaries(it)
 
-                            // 멤버 변수로 저장
-                            currentBabyModel = it
+                    // 멤버 변수로 저장
+                    currentBabyModel = it
 
-                            // Logging
-                            Log.d("Main", "현재 선택된 아이 : $it")
-                        },
-                        { it.printStackTrace() }
-                )
-                .apply { compositeDisposable.add(this) }
+                    // Logging
+                    Log.d("Main", "현재 선택된 아이 : $it")
+                },
+                { it.printStackTrace() }
+            )
+            .apply { compositeDisposable.add(this) }
     }
 
     /**
@@ -214,6 +226,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         go_to_home.setOnClickListener {
             main_all_Scrollview.isVisible = true
             frame_layout.isVisible = false
+        }
+
+        // 백색 소음 화면으로 이동
+        white_nois.setOnClickListener {
+            val intent = Intent(this, WhiteNoiseActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK and Intent.FLAG_ACTIVITY_CLEAR_TASK and Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            startActivity(intent)
         }
 
         // RecyclerView Adapter
@@ -243,9 +262,49 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         // 사진 설정
         real_baby_image.isVisible = true
         GlideApp.with(real_baby_image)
-                .load(babyModel.photos.first().file)
-                .centerCrop()
-                .into(real_baby_image)
+            .load(babyModel.photos.first().file)
+            .centerCrop()
+            .into(real_baby_image)
+
+        // 아이 이름 설정
+        BabyNameView.text = babyModel.baby.name
+
+        // 성별 설정
+        BabyGenderView.setImageResource(
+            when (babyModel.baby.sex) {
+                Sex.Female -> R.drawable.noti_icon
+                Sex.Male -> R.drawable.noti_icon_off
+            }
+        )
+
+        // 생일 혹은 출산 예정일
+        val eventDate = (if (babyModel.baby.isPregnant) babyModel.baby.babyDueDate else babyModel.baby.birthday)
+            ?: return
+
+        // 생일 뷰 설정
+        val dateFormat = SimpleDateFormat("YYYY.MM.dd", Locale.getDefault())
+        BabyBirthView.text = dateFormat.format(eventDate)
+
+        // 오늘 날짜 정보
+        val today = Calendar.getInstance()
+
+        // 아이 설명 뷰 설정
+        if (babyModel.baby.isPregnant) {
+            is_pregnant_layout.visibility = View.VISIBLE
+            BabyDescriptionView.text = "만 1세 5개월 (142)일\n태어난지 507일"
+        } else {
+            // 태어난 후 오늘까지 몇일이 지났는지
+            val diffDay = TimeUnit.MILLISECONDS.toDays(abs(today.timeInMillis - eventDate.time))
+
+            // 나이 만나이 계산 (태어난 이후 날짜 / 366)
+            val age = (diffDay / 365)
+
+            // 개월 수
+            val monthToDays = diffDay % 365
+            val month = diffDay % 365 / 30
+
+            BabyDescriptionView.text = "만 ${age}세 ${month}개월 ($monthToDays)일\n태어난지 ${diffDay}일"
+        }
     }
 
     /**
@@ -253,10 +312,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
      */
     private fun invalidateNavigationHeader(babyModel: BabyModel) {
         GlideApp.with(navigationHeaderImage)
-                .load(babyModel.photos.first().file)
-                .centerCrop()
-                .circleCrop()
-                .into(navigationHeaderImage)
+            .load(babyModel.photos.first().file)
+            .centerCrop()
+            .circleCrop()
+            .into(navigationHeaderImage)
 
         // 이름 설정
         navigationHeaderName.text = babyModel.baby.name
@@ -283,13 +342,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         // 최근 일정 다이어리 리스트 요청
         fetchDiaryDisposable = db.diaryDao()
-                .getDiaryByDateRange(babyModel.baby.id, startedAt.timeInMillis, endedAt.timeInMillis)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        { invalidateFetchDiaries(it) },
-                        { it.printStackTrace() }
-                )
+            .getDiaryByDateRange(babyModel.baby.id, startedAt.timeInMillis, endedAt.timeInMillis)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                { invalidateFetchDiaries(it) },
+                { it.printStackTrace() }
+            )
     }
 
     /**
@@ -313,13 +372,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         // 업데이트
         db.diaryDao().update(diaryModel.diary)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        { Log.d("MC", "Update Diary Model ${diaryModel.diary}") },
-                        { it.printStackTrace() }
-                )
-                .apply { compositeDisposable.add(this) }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                { Log.d("MC", "Update Diary Model ${diaryModel.diary}") },
+                { it.printStackTrace() }
+            )
+            .apply { compositeDisposable.add(this) }
     }
 
     private fun babyInfoSetting() {
@@ -415,6 +474,42 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         when (menuItem.itemId) {
             R.id.more_baby -> {
                 startActivity(Intent(this, BabyChangeActivity::class.java))
+            }
+            R.id.guide -> {
+                val intent = Intent(Intent.ACTION_VIEW).setData(Uri.parse("http://www.bebediary.co.kr/app/guide/"))
+                startActivity(intent)
+            }
+            R.id.pregnant_guide -> {
+                val intent = Intent(Intent.ACTION_VIEW).setData(Uri.parse("http://www.bebediary.co.kr/app/baby_info/"))
+                startActivity(intent)
+            }
+            R.id.review -> {
+
+                val intent = Intent(Intent.ACTION_VIEW).apply {
+                    data = Uri.parse(
+                        "https://play.google.com/store/apps/details?id=com.example.android"
+                    )
+                    setPackage("com.android.vending")
+                }
+                startActivity(intent)
+//                val i = Intent(Intent.ACTION_VIEW)
+//                val appPackageName = packageName // getPackageName() from Context or Activity object
+//                try {
+//                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$appPackageName")))
+//                } catch (anfe: android.content.ActivityNotFoundException) {
+//                    startActivity(
+//                        Intent(
+//                            Intent.ACTION_VIEW,
+//                            Uri.parse("https://play.google.com/store/apps/details?id=$appPackageName")
+//                        )
+//                    )
+//                }
+//
+//                startActivity(i)
+            }
+            R.id.together -> {
+                val intent = Intent(Intent.ACTION_VIEW).setData(Uri.parse("http://www.bebediary.co.kr/app/partner/"))
+                startActivity(intent)
             }
         }
 
