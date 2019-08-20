@@ -22,6 +22,7 @@ import com.bebediary.baby.change.BabyChangeActivity
 import com.bebediary.calendar.CalendarFragment
 import com.bebediary.camera.CameraResultActivity
 import com.bebediary.camera.CameraWrapperActivity
+import com.bebediary.database.entity.Sex
 import com.bebediary.database.model.BabyModel
 import com.bebediary.database.model.DiaryModel
 import com.bebediary.main.adapter.IncomingDiaryAdapter
@@ -38,13 +39,12 @@ import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.contents_main.*
 import kotlinx.android.synthetic.main.header_navigatioin.*
+import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.TimeUnit
+import kotlin.math.abs
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, LifecycleObserver, IncomingDiaryAdapter.OnItemChangeListener {
-
-    // 아이 정보
-    private val babyId: Long
-        get() = intent.getLongExtra("babyId", -1L)
 
     lateinit var drawerToggle: ActionBarDrawerToggle
 
@@ -163,9 +163,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         prefs = getSharedPreferences("baby_info", Context.MODE_PRIVATE)
         editor = prefs.edit()
 
-        // Add Observer
-        lifecycle.addObserver(this)
-
         babyInfoSetting()
 
         // Lifecycle Observer
@@ -258,9 +255,49 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         // 사진 설정
         real_baby_image.isVisible = true
         GlideApp.with(real_baby_image)
-                .load(babyModel.photos.first().file)
-                .centerCrop()
-                .into(real_baby_image)
+            .load(babyModel.photos.first().file)
+            .centerCrop()
+            .into(real_baby_image)
+
+        // 아이 이름 설정
+        BabyNameView.text = babyModel.baby.name
+
+        // 성별 설정
+        BabyGenderView.setImageResource(
+            when (babyModel.baby.sex) {
+                Sex.Female -> R.drawable.noti_icon
+                Sex.Male -> R.drawable.noti_icon_off
+            }
+        )
+
+        // 생일 혹은 출산 예정일
+        val eventDate = (if (babyModel.baby.isPregnant) babyModel.baby.babyDueDate else babyModel.baby.birthday)
+            ?: return
+
+        // 생일 뷰 설정
+        val dateFormat = SimpleDateFormat("YYYY.MM.dd", Locale.getDefault())
+        BabyBirthView.text = dateFormat.format(eventDate)
+
+        // 오늘 날짜 정보
+        val today = Calendar.getInstance()
+
+        // 아이 설명 뷰 설정
+        if (babyModel.baby.isPregnant) {
+            is_pregnant_layout.visibility = View.VISIBLE
+            BabyDescriptionView.text = "만 1세 5개월 (142)일\n태어난지 507일"
+        } else {
+            // 태어난 후 오늘까지 몇일이 지났는지
+            val diffDay = TimeUnit.MILLISECONDS.toDays(abs(today.timeInMillis - eventDate.time))
+
+            // 나이 만나이 계산 (태어난 이후 날짜 / 366)
+            val age = (diffDay / 365)
+
+            // 개월 수
+            val monthToDays = diffDay % 365
+            val month = diffDay % 365 / 30
+
+            BabyDescriptionView.text = "만 ${age}세 ${month}개월 ($monthToDays)일\n태어난지 ${diffDay}일"
+        }
     }
 
     /**
@@ -434,36 +471,5 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
 
         return false
-    }
-
-    /**
-     * 아이 정보 요청
-     */
-    @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
-    fun fetchBaby() {
-        db.babyDao().getById(babyId)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        { invalidateBabyWatermark(it) },
-                        { it.printStackTrace() }
-                )
-                .apply { compositeDisposable.add(this) }
-    }
-
-    /**
-     * 아이 정보를 가져와서 하단 워터마크 업데이트
-     */
-    private fun invalidateBabyWatermark(babyModel: BabyModel) {
-
-        // 아이 이름 설정
-        BabyNameView.text = babyModel.baby.name
-
-        // 생일 뷰 설정
-        BabyBirthView.text = "2019.09.09"
-
-        // 아이 설명 뷰 설정
-        BabyDescriptionView.text = "만 1세 5개월 (142)일\n태어난지 507일"
-
     }
 }
