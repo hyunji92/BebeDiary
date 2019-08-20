@@ -32,6 +32,7 @@
         <activity android:name=".memo.NoteListActivity" />
         <activity android:name=".memo.AddNoteActivity" />
         <activity android:name=".calendar.list.CalendarListActivity" />
+        <activity android:name=".calendar.detail.CalendarDetailActivity" />
         <activity
             android:name=".calendar.AddCalendarActivity"
             android:windowSoftInputMode="adjustPan" />
