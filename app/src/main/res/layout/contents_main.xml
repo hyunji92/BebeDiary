@@ -242,15 +242,58 @@
                             tools:text="@tools:sample/lorem/random" />
                     </LinearLayout>
 
-                    <FrameLayout
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="right"
-                        android:layout_marginRight="10dp"
+                        android:layout_marginRight="40dp"
                         android:layout_marginBottom="5dp"
-                        android:background="@drawable/dust">
+                        android:orientation="vertical">
 
-                    </FrameLayout>
+
+                        <ImageView
+                            android:id="@+id/dust_img"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="end"
+                            android:layout_marginRight="8dp"
+                            android:background="@drawable/dust_good" />
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:background="@drawable/dust_info_bg">
+
+                            <TextView
+                                android:id="@+id/dust_location_text"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textSize="12sp"
+                                android:textStyle="bold"
+                                android:padding="4dp"
+                                android:text="서울 특별시"
+                                android:textAlignment="center" />
+
+                            <TextView
+                                android:id="@+id/dust_text"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:padding="4dp"
+                                android:textSize="12sp"
+                                android:text="| 미세먼지 좋음"
+                                android:textAlignment="center" />
+
+
+                        </LinearLayout>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="출저 : 한국환경공단"
+                            android:textSize="7sp"
+                            android:layout_gravity="right"/>
+                    </LinearLayout>
                 </LinearLayout>
 
 
