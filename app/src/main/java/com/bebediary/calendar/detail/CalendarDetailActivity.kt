@@ -11,6 +11,7 @@ import com.bebediary.MyApplication
 import com.bebediary.R
 import com.bebediary.calendar.detail.adapter.CalendarDetailAttachmentAdapter
 import com.bebediary.database.model.DiaryModel
+import com.bebediary.util.extension.eventDateToText
 import com.bebediary.util.extension.format
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -73,6 +74,10 @@ class CalendarDetailActivity : AppCompatActivity(), LifecycleObserver {
         // 캘리더 날짜 설정
         calendarDetailDateView.text =
             diaryModel.diary.date.format("YYYY. MM. dd EEE").toUpperCase()
+
+        // 아이 정보
+        val baby = diaryModel.babies.first()
+        calendarDetailBabyEventView.text = baby.eventDateToText()
 
         // 캘린더 컨텐츠 설정
         calendarDetailContentView.text = diaryModel.diary.content
