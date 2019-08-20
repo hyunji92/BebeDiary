@@ -3,7 +3,7 @@ package com.bebediary.calendar.list
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
+import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
@@ -80,6 +80,10 @@ class CalendarListActivity : AppCompatActivity(), LifecycleObserver, CalendarLis
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun initializeView() {
         setSupportActionBar(toolbar)
+
+        supportActionBar?.apply {
+            setDisplayHomeAsUpEnabled(true)
+        }
 
         // 최초에 들어왔을때 연도 월 데이터 입력
         year = intent.getIntExtra("year", Calendar.getInstance().get(Calendar.YEAR))
@@ -233,5 +237,15 @@ class CalendarListActivity : AppCompatActivity(), LifecycleObserver, CalendarLis
             .putExtra("diaryId", model.diary.id)
             .putExtra("babyId", babyId)
         startActivity(intent)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        return when (item?.itemId) {
+            android.R.id.home -> {
+                finish()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 }

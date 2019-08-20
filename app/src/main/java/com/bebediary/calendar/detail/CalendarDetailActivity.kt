@@ -1,6 +1,7 @@
 package com.bebediary.calendar.detail
 
 import android.os.Bundle
+import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
@@ -51,6 +52,13 @@ class CalendarDetailActivity : AppCompatActivity(), LifecycleObserver {
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun initializeView() {
+        setSupportActionBar(toolbar)
+
+        supportActionBar?.apply {
+            setDisplayHomeAsUpEnabled(true)
+            setDisplayShowTitleEnabled(false)
+        }
+
         calendarDetailImageRecyclerView.adapter = calendarDetailAttachmentAdapter
     }
 
@@ -103,6 +111,16 @@ class CalendarDetailActivity : AppCompatActivity(), LifecycleObserver {
                 diaryModel.diaryAttachments.subList(1, diaryModel.diaryAttachments.count())
             calendarDetailAttachmentAdapter.items = recyclerViewAttachments
             calendarDetailAttachmentAdapter.notifyDataSetChanged()
+        }
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        return when (item?.itemId) {
+            android.R.id.home -> {
+                finish()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
         }
     }
 }
