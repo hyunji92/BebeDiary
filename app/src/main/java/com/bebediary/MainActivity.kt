@@ -25,6 +25,7 @@ import com.bebediary.camera.CameraWrapperActivity
 import com.bebediary.database.entity.Sex
 import com.bebediary.database.model.BabyModel
 import com.bebediary.database.model.DiaryModel
+import com.bebediary.info.InfoFragment
 import com.bebediary.main.adapter.IncomingDiaryAdapter
 import com.bebediary.memo.NoteListActivity
 import com.bebediary.register.BabyRegisterActivity
@@ -69,6 +70,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private val fragmentManager = supportFragmentManager
 
     private val calendarFragment = CalendarFragment()
+    private val infoFragment = InfoFragment()
 
     private val onNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
 
@@ -86,7 +88,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 Log.d("test", "test calendar")
                 main_all_Scrollview.visibility = View.GONE
                 frame_layout.visibility = View.VISIBLE
-                transaction.replace(R.id.frame_layout, calendarFragment).commitAllowingStateLoss();
+                transaction.replace(R.id.frame_layout, calendarFragment).commitAllowingStateLoss()
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_checklist -> {
@@ -95,6 +97,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
             R.id.navigation_information -> {
                 Log.d("test", "test information")
+                main_all_Scrollview.visibility = View.GONE
+                frame_layout.visibility = View.VISIBLE
+                transaction.replace(R.id.frame_layout, infoFragment).commitAllowingStateLoss()
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_memo -> {
