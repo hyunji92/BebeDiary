@@ -28,7 +28,7 @@ fun Baby.dueDateToText(): String {
     val todayCalendar = Calendar.getInstance()
 
     // 날짜 차이
-    val diffDays = TimeUnit.MILLISECONDS.toDays(pregnantCalendar.timeInMillis - todayCalendar.timeInMillis)
+    val diffDays = TimeUnit.MILLISECONDS.toDays(todayCalendar.timeInMillis - pregnantCalendar.timeInMillis)
 
     // 주차, 날짜
     val month = diffDays / 7
