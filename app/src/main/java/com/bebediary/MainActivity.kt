@@ -47,7 +47,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     IncomingDiaryAdapter.OnItemChangeListener {
 
     // API
-    private val airQualityApi by lazy { AirQualityApi() }
+    private val airQualityApi by lazy { AirQualityApi(this) }
 
     // Composite Disposable
     private val compositeDisposable = CompositeDisposable()
