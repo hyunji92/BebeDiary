@@ -11,9 +11,9 @@ import com.bebediary.database.entity.*
 import com.bebediary.database.model.DiaryAttachmentModel
 
 @Database(
-        entities = [Baby::class, Attachment::class, Note::class, Diary::class, DiaryAttachment::class],
-        views = [DiaryAttachmentModel::class],
-        version = 7
+    entities = [Baby::class, Attachment::class, Note::class, Diary::class, DiaryAttachment::class, CheckList::class, CheckListCategory::class],
+    views = [DiaryAttachmentModel::class],
+    version = 1
 )
 @TypeConverters(SexTypeConverter::class, DateTypeConverter::class, FileTypeConverter::class)
 abstract class AppDatabase : RoomDatabase() {
@@ -22,4 +22,6 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun attachmentDao(): AttachmentDao
     abstract fun diaryDao(): DiaryDao
     abstract fun diaryAttachmentDao(): DiaryAttachmentDao
+    abstract fun checkListCategoryDao(): CheckListCategoryDao
+    abstract fun checkListDao(): CheckListDao
 }

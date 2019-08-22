@@ -20,6 +20,7 @@ import com.bebediary.R
 import com.bebediary.camera.CameraWrapperActivity
 import com.bebediary.database.entity.Attachment
 import com.bebediary.database.entity.Baby
+import com.bebediary.database.entity.CheckList
 import com.bebediary.database.entity.Sex
 import com.bebediary.util.Constants
 import com.bebediary.util.extension.format
@@ -76,6 +77,39 @@ class BabyRegisterActivity : Activity() {
 
     // 수정 모드 여부
     private var isEdit = false
+
+    // 기본 체크 리스트
+    // CategoryID  = .database.callback.CheckListInitializer 확인
+    // 기본으로 추가되는 아이템의 인덱스 + 1 이 카테고리 아이디
+    private val defaultCheckLists = mapOf(
+        2 to arrayOf(
+            "임신 확인서 / 진단서 발급",
+            "국민행복카드 발급 / 바우처 신청 (병원비 등 국가혜택)",
+            "보건소 무료 검사 및 영양제 등 혜택",
+            "산후돌보미(정부지원) / 산후조리원 / 태아보험 알아보기",
+            "산전검사",
+            "1차기형아검사"
+        ),
+        3 to arrayOf(
+            "2차기형아검사",
+            "정밀 초음파"
+        ),
+        4 to arrayOf(
+            "입체 초음파",
+            "출산가방 싸기"
+        ),
+        5 to arrayOf(
+            "산후도우미 / 산후조리원에 출산 알리기",
+            "출생신고 및 국가 지원 수당 신청",
+            "태아보험 등재",
+            "아이사랑포털 - 아기 등록 및 어린이집 입소대기 신청",
+            "예방접종] BCG",
+            "예방접종] B형 간염",
+            "예방접종] 폐렴구균 / 디프테리아 / 파상풍 / 백일해 / 폴리오 / b형 헤모필루스 인플루엔자",
+            "예방접종] 홍역 / 유행성이하선염 / 풍진 / 수두 / A형 간염 / 일본뇌염 / 인플루엔자",
+            "예방접종] 선택 사항 : 로타바이러스 / 수막구균 / 장티푸스 등"
+        )
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -287,6 +321,18 @@ class BabyRegisterActivity : Activity() {
 
         // 데이터 입력
         db.babyDao().insert(baby)
+            .flatMap { babyId ->
+                val checkLists = defaultCheckLists.entries.map { entry ->
+                    entry.value.map { value ->
+                        CheckList(
+                            categoryId = entry.key.toLong(),
+                            content = value,
+                            babyId = babyId
+                        )
+                    }
+                }.flatten()
+                db.checkListDao().insertAll(checkLists)
+            }
             .subscribeOn(Schedulers.io())
             .subscribe(
                 { finish() },

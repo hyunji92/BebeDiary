@@ -1,19 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:background="@color/mainColor"
-        android:layout_margin="5dp">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="16dp"
+    android:layout_marginTop="16dp"
+    android:layout_marginEnd="16dp"
+    android:layout_marginBottom="8dp"
+    android:background="@color/mainColor"
+    android:orientation="horizontal">
 
     <TextView
-            android:id="@+id/pregnant_period"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="임?"
-            android:textSize="20sp"
-            android:textColor="#ffffff"
-            android:padding="10dp"/>
-
+        android:id="@+id/checkListHeaderTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingStart="4dp"
+        android:paddingEnd="4dp"
+        android:text="임신초기"
+        android:textColor="@android:color/white"
+        android:textSize="16sp" />
 </LinearLayout>

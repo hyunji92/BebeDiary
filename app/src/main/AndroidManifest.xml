@@ -38,6 +38,9 @@
             android:name=".calendar.AddCalendarActivity"
             android:windowSoftInputMode="adjustPan" />
         <activity android:name=".checklist.CheckListActivity" />
+        <activity
+            android:name=".checklist.CheckListAddActivity"
+            android:theme="@style/AppTheme.CheckListActivity" />
         <activity android:name=".baby.change.BabyChangeActivity" />
         <activity android:name=".camera.CameraWrapperActivity" />
         <activity android:name=".camera.CameraResultActivity" />

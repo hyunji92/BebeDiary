@@ -11,6 +11,9 @@
     <string name="permission_2">사진 및 파일을 저장하기 위하여 접근 권한이 필요합니다.</string>
 
 
+    <!-- 체크리스트 스피너 힌트 -->
+    <string name="check_list_add_spinner_hint">카테고리를 선택해주세요</string>
+
     <string name="drawer_open">drawer open</string>
     <string name="drawer_close">drawer close</string>
 </resources>
