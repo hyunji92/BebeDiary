@@ -1,6 +1,9 @@
 package com.bebediary
 
+import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
@@ -21,6 +24,7 @@ import com.bebediary.calendar.CalendarFragment
 import com.bebediary.camera.CameraResultActivity
 import com.bebediary.camera.CameraWrapperActivity
 import com.bebediary.checklist.CheckListActivity
+import com.bebediary.data.AirQuality
 import com.bebediary.database.entity.Sex
 import com.bebediary.database.model.BabyModel
 import com.bebediary.database.model.DiaryModel
@@ -48,6 +52,16 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     // API
     private val airQualityApi by lazy { AirQualityApi(this) }
+    private var airQualityItems = arrayListOf<AirQuality>()
+    private val airQualityStorage by lazy { getSharedPreferences("air_quality", Context.MODE_PRIVATE) }
+
+    // 대기질 선택해놓은 지역 정보
+    private var airQualitySido: String?
+        get() = airQualityStorage.getString("sido", null)
+        set(value) = airQualityStorage.edit().putString("sido", value).apply()
+    private var airQualityCity: String?
+        get() = airQualityStorage.getString("city", null)
+        set(value) = airQualityStorage.edit().putString("city", value).apply()
 
     // Composite Disposable
     private val compositeDisposable = CompositeDisposable()
@@ -154,6 +168,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             startActivity(intent)
         }
 
+        // 대기질 지역 설정 다이얼로그 보여줌
+        mainAirQualityGroupView.setOnClickListener { openSelectLocationDialog() }
+
         // RecyclerView Adapter
         mainIncomingDiaryRecyclerView.adapter = incomingDiaryAdapter
     }
@@ -200,8 +217,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
                 {
-                    // TODO 현재 미세먼지 정보 보여주는 레이아웃 작업 필요
-                    Log.d("MainActivity", it.toString())
+                    airQualityItems.clear()
+                    airQualityItems.addAll(it)
+
+                    invalidateAirQualityView()
                 },
                 { it.printStackTrace() }
             )
@@ -274,6 +293,26 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         // 이름 설정
         navigationHeaderName.text = babyModel.baby.name
+    }
+
+    /**
+     * 대기질 레이아웃 설정
+     */
+    @SuppressLint("SetTextI18n")
+    private fun invalidateAirQualityView() {
+
+        // 대기질 정보가 없을때 뷰를 업데이트 하지 않음
+        if (airQualityItems.count() == 0) {
+            return
+        }
+
+        // 필터된 아이템
+        val filterItems = airQualityItems.filter { it.cityName == airQualityCity && it.sidoName == airQualitySido }
+
+        // 사용할 아이템 정보
+        val item = if (filterItems.count() == 0) airQualityItems.first() else filterItems.first()
+        mainDustLocation.text = "${item.sidoName} ${item.cityName}"
+        mainDustValue.text = "PM ${item.pm10}"
     }
 
     /**
@@ -398,6 +437,30 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         intent.putExtra("babyId", babyId)
         intent.putExtra("imagePath", imagePath)
         startActivity(intent)
+    }
+
+    /**
+     * 지역 선택 다이얼로그 보여줌
+     */
+    private fun openSelectLocationDialog() {
+        if (airQualityItems.count() == 0) return
+
+        // 아이템 리스트
+        val items = airQualityItems.map { "${it.sidoName} - ${it.cityName}" }
+            .sorted()
+            .toTypedArray()
+
+        // Dialog 보여줌
+        AlertDialog.Builder(this)
+            .setTitle("지역을 선택해주세요")
+            .setItems(items) { _, position ->
+                val sidoCityName = items[position].split(" - ")
+                this.airQualitySido = sidoCityName[0]
+                this.airQualityCity = sidoCityName[1]
+                invalidateAirQualityView()
+            }
+            .setNegativeButton(android.R.string.cancel) { dialog, _ -> dialog.dismiss() }
+            .show()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
