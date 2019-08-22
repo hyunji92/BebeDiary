@@ -1,5 +1,7 @@
 package com.bebediary.camera
 
+import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
@@ -13,6 +15,8 @@ import androidx.lifecycle.OnLifecycleEvent
 import com.bebediary.GlideApp
 import com.bebediary.MyApplication
 import com.bebediary.R
+import com.bebediary.api.AirQualityApi
+import com.bebediary.data.AirQuality
 import com.bebediary.database.entity.Sex
 import com.bebediary.database.model.BabyModel
 import com.bebediary.util.extension.eventDateToText
@@ -41,6 +45,19 @@ class CameraResultActivity : AppCompatActivity(), LifecycleObserver {
 
     // Database
     private val db by lazy { (application as MyApplication).db }
+
+    // API
+    private val airQualityApi by lazy { AirQualityApi(this) }
+    private var airQualityItems = arrayListOf<AirQuality>()
+    private val airQualityStorage by lazy { getSharedPreferences("air_quality", Context.MODE_PRIVATE) }
+
+    // 대기질 선택해놓은 지역 정보
+    private var airQualitySido: String?
+        get() = airQualityStorage.getString("sido", null)
+        set(value) = airQualityStorage.edit().putString("sido", value).apply()
+    private var airQualityCity: String?
+        get() = airQualityStorage.getString("city", null)
+        set(value) = airQualityStorage.edit().putString("city", value).apply()
 
     // Disposable
     private val compositeDisposable by lazy { CompositeDisposable() }
@@ -88,6 +105,47 @@ class CameraResultActivity : AppCompatActivity(), LifecycleObserver {
                 { it.printStackTrace() }
             )
             .apply { compositeDisposable.add(this) }
+    }
+
+    /**
+     * 서버에서 대기질 정보를 가져오는 API 호출 후
+     * List<AirQuality> 형태의 데이터로 받아온다
+     */
+    @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
+    fun fetchAirQuality() {
+        airQualityApi.getAirQuality()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                {
+                    airQualityItems.clear()
+                    airQualityItems.addAll(it)
+
+                    invalidateAirQualityView()
+                },
+                { it.printStackTrace() }
+            )
+            .apply { compositeDisposable.add(this) }
+    }
+
+    /**
+     * 대기질 레이아웃 설정
+     */
+    @SuppressLint("SetTextI18n")
+    private fun invalidateAirQualityView() {
+
+        // 대기질 정보가 없을때 뷰를 업데이트 하지 않음
+        if (airQualityItems.count() == 0) {
+            return
+        }
+
+        // 필터된 아이템
+        val filterItems = airQualityItems.filter { it.cityName == airQualityCity && it.sidoName == airQualitySido }
+
+        // 사용할 아이템 정보
+        val item = if (filterItems.count() == 0) airQualityItems.first() else filterItems.first()
+        cameraResultDustLocation.text = "${item.sidoName} ${item.cityName}"
+        cameraResultDustValue.text = "PM ${item.pm10}"
     }
 
     /**
