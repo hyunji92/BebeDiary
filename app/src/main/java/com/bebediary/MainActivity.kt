@@ -15,6 +15,7 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
+import com.bebediary.api.AirQualityApi
 import com.bebediary.baby.change.BabyChangeActivity
 import com.bebediary.calendar.CalendarFragment
 import com.bebediary.camera.CameraResultActivity
@@ -44,6 +45,9 @@ import java.util.*
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, LifecycleObserver,
     IncomingDiaryAdapter.OnItemChangeListener {
+
+    // API
+    private val airQualityApi by lazy { AirQualityApi() }
 
     // Composite Disposable
     private val compositeDisposable = CompositeDisposable()
@@ -179,6 +183,25 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
                     // Logging
                     Log.d("Main", "현재 선택된 아이 : $it")
+                },
+                { it.printStackTrace() }
+            )
+            .apply { compositeDisposable.add(this) }
+    }
+
+    /**
+     * 서버에서 대기질 정보를 가져오는 API 호출 후
+     * List<AirQuality> 형태의 데이터로 받아온다
+     */
+    @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
+    fun fetchAirQuality() {
+        airQualityApi.getAirQuality()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                {
+                    // TODO 현재 미세먼지 정보 보여주는 레이아웃 작업 필요
+                    Log.d("MainActivity", it.toString())
                 },
                 { it.printStackTrace() }
             )
