@@ -59,7 +59,11 @@
                 android:resource="@xml/provider_paths" />
         </provider>
 
-
+        <!-- 캘린더 알람 리시버 -->
+        <receiver
+            android:name=".calendar.alarm.CalendarAlarmReceiver"
+            android:enabled="true"
+            android:exported="false" />
     </application>
 
 </manifest>

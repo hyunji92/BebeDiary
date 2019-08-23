@@ -1,11 +1,11 @@
 package com.bebediary
 
 import android.annotation.SuppressLint
-import android.app.Activity
-import android.app.AlertDialog
+import android.app.*
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -21,6 +21,7 @@ import androidx.lifecycle.OnLifecycleEvent
 import com.bebediary.api.AirQualityApi
 import com.bebediary.baby.change.BabyChangeActivity
 import com.bebediary.calendar.CalendarFragment
+import com.bebediary.calendar.alarm.CalendarAlarmReceiver
 import com.bebediary.camera.CameraResultActivity
 import com.bebediary.camera.CameraWrapperActivity
 import com.bebediary.checklist.CheckListActivity
@@ -47,13 +48,19 @@ import kotlinx.android.synthetic.main.contents_main.*
 import kotlinx.android.synthetic.main.header_navigatioin.view.*
 import java.util.*
 
-class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, LifecycleObserver,
+class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener,
+    LifecycleObserver,
     IncomingDiaryAdapter.OnItemChangeListener {
 
     // API
     private val airQualityApi by lazy { AirQualityApi(this) }
     private var airQualityItems = arrayListOf<AirQuality>()
-    private val airQualityStorage by lazy { getSharedPreferences("air_quality", Context.MODE_PRIVATE) }
+    private val airQualityStorage by lazy {
+        getSharedPreferences(
+            "air_quality",
+            Context.MODE_PRIVATE
+        )
+    }
 
     // 대기질 선택해놓은 지역 정보
     private var airQualitySido: String?
@@ -94,22 +101,23 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     // 하단 네비게이션 리스너
-    private val bottomNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
+    private val bottomNavigationItemSelectedListener =
+        BottomNavigationView.OnNavigationItemSelectedListener { item ->
 
-        // 아이가 선택되어 있어야만 아래의 모든 작업을 할 수 있으므로 아이가 선택되어있지 않으면 리턴
-        currentBabyModel?.baby?.id ?: return@OnNavigationItemSelectedListener false
+            // 아이가 선택되어 있어야만 아래의 모든 작업을 할 수 있으므로 아이가 선택되어있지 않으면 리턴
+            currentBabyModel?.baby?.id ?: return@OnNavigationItemSelectedListener false
 
-        // 아이디에 해당하는 액션 실행
-        when (item.itemId) {
-            R.id.navigation_camera -> openBabyCamera()
-            R.id.navigation_calendar -> replaceToCalendar()
-            R.id.navigation_checklist -> openCheckList()
-            R.id.navigation_information -> replaceToInformation()
-            R.id.navigation_memo -> openNoteList()
+            // 아이디에 해당하는 액션 실행
+            when (item.itemId) {
+                R.id.navigation_camera -> openBabyCamera()
+                R.id.navigation_calendar -> replaceToCalendar()
+                R.id.navigation_checklist -> openCheckList()
+                R.id.navigation_information -> replaceToInformation()
+                R.id.navigation_memo -> openNoteList()
+            }
+
+            true
         }
-
-        true
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -227,6 +235,114 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             .apply { compositeDisposable.add(this) }
     }
 
+    /**
+     * Calendar Notification Register 생성
+     */
+    @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
+    fun registerCalendarNotification() {
+        // Alarm Manager
+        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+        // 당일 날짜
+        val start = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+
+        // 모든 다이어리 정보 가져온다
+        db.diaryDao().getAllFuture(start.timeInMillis)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                {
+                    // 현재 시간 캘린더 정보
+                    val now = Calendar.getInstance()
+
+                    // 알람 등록
+                    it
+                        .filter { diary -> diary.diary.date.time >= now.timeInMillis }
+                        .filter { diary -> !diary.diary.isComplete && diary.diary.isEnableNotification }
+                        .forEach { diary ->
+                            // 전날 알림
+                            val before = Calendar.getInstance().apply {
+                                timeInMillis = diary.diary.date.time
+                                set(Calendar.HOUR, 12)
+                                set(Calendar.MINUTE, 0)
+                                set(Calendar.SECOND, 0)
+                                add(Calendar.DAY_OF_MONTH, -1)
+                            }
+
+                            // 전날 알림 인텐트
+                            val beforeIntent = Intent(this, CalendarAlarmReceiver::class.java)
+                            beforeIntent.putExtra("content", diary.diary.content)
+                            beforeIntent.putExtra("isBefore", true)
+
+                            // 전날 알림 Pending Intent
+                            val beforePendingIntent = PendingIntent.getBroadcast(
+                                this,
+                                Constants.notificationCalendarRequestCode,
+                                beforeIntent,
+                                PendingIntent.FLAG_UPDATE_CURRENT
+                            )
+
+                            // 당일 알림
+                            val dDay = Calendar.getInstance().apply {
+                                timeInMillis = diary.diary.date.time
+                                set(Calendar.HOUR, 12)
+                                set(Calendar.MINUTE, 0)
+                                set(Calendar.SECOND, 0)
+                            }
+
+                            // 당일 알림 인텐트
+                            val dDayIntent = Intent(this, CalendarAlarmReceiver::class.java)
+                            dDayIntent.putExtra("content", diary.diary.content)
+                            dDayIntent.putExtra("isBefore", false)
+
+                            // 당일 알림 Pending Intent
+                            val dDayPendingIntent = PendingIntent.getBroadcast(
+                                this,
+                                Constants.notificationCalendarRequestCode,
+                                dDayIntent,
+                                PendingIntent.FLAG_UPDATE_CURRENT
+                            )
+
+                            // 알림 등록
+                            alarmManager.apply {
+                                set(AlarmManager.RTC_WAKEUP, dDay.timeInMillis, dDayPendingIntent)
+                                set(
+                                    AlarmManager.RTC_WAKEUP,
+                                    before.timeInMillis,
+                                    beforePendingIntent
+                                )
+                            }
+                        }
+                },
+                { it.printStackTrace() }
+            )
+            .apply { compositeDisposable.add(this) }
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
+    fun createNotificationChannel() {
+        val notificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            val notificationChannel = NotificationChannel(
+                Constants.notificationChannelIdCalendar,
+                Constants.notificationChannelNameCalendar,
+                NotificationManager.IMPORTANCE_HIGH
+            )
+            notificationChannel.enableLights(true)
+            notificationChannel.lightColor = Color.RED
+            notificationChannel.enableVibration(true)
+            notificationChannel.description = Constants.notificationChannelDescriptionCalendar
+            notificationManager.createNotificationChannel(notificationChannel)
+        }
+    }
+
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     fun dispose() = compositeDisposable.dispose()
 
@@ -266,8 +382,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         )
 
         // 생일 혹은 출산 예정일
-        val eventDate = (if (babyModel.baby.isPregnant) babyModel.baby.babyDueDate else babyModel.baby.birthday)
-            ?: return
+        val eventDate =
+            (if (babyModel.baby.isPregnant) babyModel.baby.babyDueDate else babyModel.baby.birthday)
+                ?: return
 
         // 생일 뷰 설정
         BabyBirthView.text = eventDate.format("YYYY.MM.dd")
@@ -307,7 +424,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
 
         // 필터된 아이템
-        val filterItems = airQualityItems.filter { it.cityName == airQualityCity && it.sidoName == airQualitySido }
+        val filterItems =
+            airQualityItems.filter { it.cityName == airQualityCity && it.sidoName == airQualitySido }
 
         // 사용할 아이템 정보
         val item = if (filterItems.count() == 0) airQualityItems.first() else filterItems.first()
