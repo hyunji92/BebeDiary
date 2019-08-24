@@ -22,5 +22,7 @@
         android:id="@+id/checkListItemContent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        tools:text="국민행복카드 발급 / 바우처 신청 (병원비 등 국가혜택)" />
+        android:layout_gravity="center|center_vertical"
+        android:layout_margin="4dp"
+        tools:text="예방접종] 홍역 / 유행성이하선염 / 풍진 / 수두 / A형 간염 / 일본뇌염 / 인플루엔자" />
 </LinearLayout>

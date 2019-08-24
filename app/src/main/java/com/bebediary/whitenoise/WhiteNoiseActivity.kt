@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.bebediary.R
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import kotlinx.android.synthetic.main.activity_whitenoise.*
 
 class WhiteNoiseActivity : AppCompatActivity() {
     private val onNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
@@ -29,6 +30,11 @@ class WhiteNoiseActivity : AppCompatActivity() {
         navView.apply {
             isItemHorizontalTranslationEnabled = false
             setOnNavigationItemSelectedListener(onNavigationItemSelectedListener)
+        }
+
+
+        back_button.setOnClickListener {
+            this.finish()
         }
     }
 

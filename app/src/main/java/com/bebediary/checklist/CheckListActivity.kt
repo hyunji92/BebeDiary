@@ -65,6 +65,10 @@ class CheckListActivity : AppCompatActivity(), LifecycleObserver, CheckListSecti
         }
 
         lifecycle.addObserver(this)
+
+        back_button.setOnClickListener {
+            this.finish()
+        }
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
