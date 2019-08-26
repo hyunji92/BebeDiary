@@ -29,6 +29,7 @@ import com.bebediary.data.AirQuality
 import com.bebediary.database.entity.Sex
 import com.bebediary.database.model.BabyModel
 import com.bebediary.database.model.DiaryModel
+import com.bebediary.gallery.GalleryActivity
 import com.bebediary.info.InfoFragment
 import com.bebediary.main.adapter.IncomingDiaryAdapter
 import com.bebediary.memo.NoteListActivity
@@ -558,6 +559,16 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     /**
+     * 아이 사진 모아보는 갤러리 실행
+     */
+    private fun openGallery() {
+        val babyId = currentBabyModel?.baby?.id ?: return
+        val intent = Intent(this@MainActivity, GalleryActivity::class.java)
+        intent.putExtra("babyId", babyId)
+        startActivity(intent)
+    }
+
+    /**
      * 지역 선택 다이얼로그 보여줌
      */
     private fun openSelectLocationDialog() {
@@ -603,6 +614,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             R.id.more_baby -> {
                 startActivity(Intent(this, BabyChangeActivity::class.java))
             }
+            R.id.navigation_gallery -> openGallery()
             R.id.guide -> {
                 val intent = Intent(Intent.ACTION_VIEW)
                     .setData(Uri.parse("http://www.bebediary.co.kr/app/guide/"))

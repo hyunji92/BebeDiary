@@ -7,6 +7,7 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.drawToBitmap
 import androidx.lifecycle.Lifecycle
@@ -17,9 +18,13 @@ import com.bebediary.MyApplication
 import com.bebediary.R
 import com.bebediary.api.AirQualityApi
 import com.bebediary.data.AirQuality
+import com.bebediary.database.entity.Attachment
+import com.bebediary.database.entity.Photo
+import com.bebediary.database.entity.PhotoAttachment
 import com.bebediary.database.entity.Sex
 import com.bebediary.database.model.BabyModel
 import com.bebediary.util.extension.eventDateToText
+import com.bebediary.util.extension.toAttachment
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -49,7 +54,12 @@ class CameraResultActivity : AppCompatActivity(), LifecycleObserver {
     // API
     private val airQualityApi by lazy { AirQualityApi(this) }
     private var airQualityItems = arrayListOf<AirQuality>()
-    private val airQualityStorage by lazy { getSharedPreferences("air_quality", Context.MODE_PRIVATE) }
+    private val airQualityStorage by lazy {
+        getSharedPreferences(
+            "air_quality",
+            Context.MODE_PRIVATE
+        )
+    }
 
     // 대기질 선택해놓은 지역 정보
     private var airQualitySido: String?
@@ -140,7 +150,8 @@ class CameraResultActivity : AppCompatActivity(), LifecycleObserver {
         }
 
         // 필터된 아이템
-        val filterItems = airQualityItems.filter { it.cityName == airQualityCity && it.sidoName == airQualitySido }
+        val filterItems =
+            airQualityItems.filter { it.cityName == airQualityCity && it.sidoName == airQualitySido }
 
         // 사용할 아이템 정보
         val item = if (filterItems.count() == 0) airQualityItems.first() else filterItems.first()
@@ -165,8 +176,9 @@ class CameraResultActivity : AppCompatActivity(), LifecycleObserver {
         )
 
         // 생일 혹은 출산 예정일
-        val eventDate = (if (babyModel.baby.isPregnant) babyModel.baby.babyDueDate else babyModel.baby.birthday)
-            ?: return
+        val eventDate =
+            (if (babyModel.baby.isPregnant) babyModel.baby.babyDueDate else babyModel.baby.birthday)
+                ?: return
 
         // 생일 뷰 설정
         val dateFormat = SimpleDateFormat("YYYY.MM.dd", Locale.getDefault())
@@ -180,14 +192,21 @@ class CameraResultActivity : AppCompatActivity(), LifecycleObserver {
      * 이미지 파일 저장 후 화면 종료
      */
     private fun saveAndExit() {
-        val currentTimeString = SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault()).format(Date())
+        val currentTimeString =
+            SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault()).format(Date())
         val storageDirectory = File(Environment.getExternalStorageDirectory().toString(), "/Bebe")
         if (storageDirectory.exists().not()) {
             storageDirectory.mkdirs()
         }
 
         // 저장될 이미지 파일
-        val imageFile = File(storageDirectory, "${cameraResultWatermarkBabyNameView.text}-$currentTimeString.jpg")
+        val imageFile = File(
+            storageDirectory,
+            "${cameraResultWatermarkBabyNameView.text}-$currentTimeString.jpg"
+        )
+
+        // Attachment ID
+        var attachmentId: Long = -1L
 
         // 저장 작업 실행
         Observable.fromCallable {
@@ -197,6 +216,21 @@ class CameraResultActivity : AppCompatActivity(), LifecycleObserver {
             output.flush()
             output.close()
         }
+            .flatMap { imageFile.toAttachment(this).toObservable() }
+            .flatMap { db.attachmentDao().insert(it).toObservable() }
+            .flatMap {
+                Log.d("CameraResult", "Attachment ID : $it")
+                attachmentId = it
+                Log.d("CameraResult", "Attachment ID : $attachmentId")
+                db.photoDao().insert(Photo(babyId = babyId)).toObservable()
+            }
+            .flatMap {
+                Log.d("CameraResult", "Insert PhotoAttachment : $attachmentId")
+                Log.d("CameraResult", "Insert ($it, $attachmentId)")
+                db.photoAttachmentDao()
+                    .insert(PhotoAttachment(photoId = it, attachmentId = attachmentId))
+                    .toObservable()
+            }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(

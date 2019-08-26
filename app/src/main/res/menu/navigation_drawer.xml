@@ -7,6 +7,11 @@
             android:title="아기추가" />
 
         <item
+            android:id="@+id/navigation_gallery"
+            android:icon="@android:drawable/ic_menu_gallery"
+            android:title="갤러리" />
+
+        <item
             android:id="@+id/guide"
             android:icon="@drawable/guide_icon"
             android:title="이용가이드" />
