@@ -15,6 +15,7 @@ import com.bebediary.calendar.decorator.DiaryDecorator
 import com.bebediary.calendar.decorator.OneDayDecorator
 import com.bebediary.calendar.decorator.SaturdayDecorator
 import com.bebediary.calendar.decorator.SundayDecorator
+import com.bebediary.calendar.detail.CalendarDetailActivity
 import com.bebediary.calendar.list.CalendarListActivity
 import com.bebediary.database.model.BabyModel
 import com.bebediary.database.model.DiaryModel
@@ -171,13 +172,28 @@ class CalendarFragment : Fragment(), LifecycleObserver, OnDateSelectedListener {
             val activity = activity ?: return
             val babyModel = currentBabyModel ?: return
 
-            // 인텐트 생성
-            val intent = Intent(activity, AddCalendarActivity::class.java)
-                .putExtra("babyId", babyModel.baby.id)
-                .putExtra("year", date.year)
-                .putExtra("month", date.month)
-                .putExtra("day", date.day)
-            activity.startActivity(intent)
+            // 기존에 등록 되어있는 일정이 있으면 상세보기 화면으로 이동
+            val hasDiary = diaryModels.find {
+                val diaryDate = Calendar.getInstance().apply { time = it.diary.date }
+                diaryDate.get(Calendar.YEAR) == date.year &&
+                        diaryDate.get(Calendar.MONTH) == date.month &&
+                        diaryDate.get(Calendar.DAY_OF_MONTH) == date.day
+            }
+
+            // 다이어리가 있는 경우 상세 화면으로, 없는 경우 추가 화면으로 이동
+            val intent = if (hasDiary != null) {
+                Intent(activity, CalendarDetailActivity::class.java)
+                    .putExtra("diaryId", hasDiary.diary.id)
+                    .putExtra("babyId", babyModel.baby.id)
+            } else {
+                // 인텐트 생성
+                Intent(activity, AddCalendarActivity::class.java)
+                    .putExtra("babyId", babyModel.baby.id)
+                    .putExtra("year", date.year)
+                    .putExtra("month", date.month)
+                    .putExtra("day", date.day)
+            }
+            startActivity(intent)
         }
     }
 }
