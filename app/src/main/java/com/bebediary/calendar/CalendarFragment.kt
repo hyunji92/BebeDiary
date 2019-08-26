@@ -44,7 +44,14 @@ class CalendarFragment : Fragment(), LifecycleObserver, OnDateSelectedListener {
     // 현재 선택된 아이 정보
     private var currentBabyModel: BabyModel? = null
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    // 다이어리 모델 리스트 저장
+    private var diaryModels: List<DiaryModel> = listOf()
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         val view = inflater.inflate(R.layout.fragment_calendar, container, false)
 
         // Lifecycle Observer 추가
@@ -61,7 +68,7 @@ class CalendarFragment : Fragment(), LifecycleObserver, OnDateSelectedListener {
         view.calendarMoveToList.setOnClickListener {
             val babyModel = currentBabyModel ?: return@setOnClickListener
             val intent = Intent(requireContext(), CalendarListActivity::class.java)
-                    .putExtra("babyId", babyModel.baby.id)
+                .putExtra("babyId", babyModel.baby.id)
             startActivity(intent)
         }
     }
@@ -72,11 +79,11 @@ class CalendarFragment : Fragment(), LifecycleObserver, OnDateSelectedListener {
 
         // 캘린더 뷰 설정
         view.calendarView.state().edit()
-                .setFirstDayOfWeek(Calendar.SUNDAY)
-                .setMinimumDate(CalendarDay.from(2017, 0, 1)) // 달력의 시작
-                .setMaximumDate(CalendarDay.from(2030, 11, 31)) // 달력의 끝
-                .setCalendarDisplayMode(CalendarMode.MONTHS)
-                .commit()
+            .setFirstDayOfWeek(Calendar.SUNDAY)
+            .setMinimumDate(CalendarDay.from(2017, 0, 1)) // 달력의 시작
+            .setMaximumDate(CalendarDay.from(2030, 11, 31)) // 달력의 끝
+            .setCalendarDisplayMode(CalendarMode.MONTHS)
+            .commit()
 
         // 기본 데코레이터 설정
         view.calendarView.addDecorators(saturdayDecorator, sundayDecorator, oneDayDecorator)
@@ -91,19 +98,19 @@ class CalendarFragment : Fragment(), LifecycleObserver, OnDateSelectedListener {
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
     fun fetchCurrentBaby() {
         db.babyDao().getSelected()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        {
-                            // 현재 아이 멤버 데이터로 저장
-                            currentBabyModel = it
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                {
+                    // 현재 아이 멤버 데이터로 저장
+                    currentBabyModel = it
 
-                            // 현재 아이의 다이어리 정보 업데이트
-                            fetchBabyDiaries()
-                        },
-                        { it.printStackTrace() }
-                )
-                .apply { compositeDisposable.add(this) }
+                    // 현재 아이의 다이어리 정보 업데이트
+                    fetchBabyDiaries()
+                },
+                { it.printStackTrace() }
+            )
+            .apply { compositeDisposable.add(this) }
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
@@ -115,15 +122,18 @@ class CalendarFragment : Fragment(), LifecycleObserver, OnDateSelectedListener {
     private fun fetchBabyDiaries() {
         val baby = currentBabyModel?.baby ?: return
         db.diaryDao().getBabyDiaries(baby.id)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        {
-                            invalidateDiaryDecorators(it)
-                        },
-                        { it.printStackTrace() }
-                )
-                .apply { compositeDisposable.add(this) }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                {
+                    // 다이어리 모델 리스트 저장
+                    diaryModels = it
+
+                    invalidateDiaryDecorators(it)
+                },
+                { it.printStackTrace() }
+            )
+            .apply { compositeDisposable.add(this) }
     }
 
     /**
@@ -138,17 +148,21 @@ class CalendarFragment : Fragment(), LifecycleObserver, OnDateSelectedListener {
         // 다이어리 모델 정보로 데코레이터 생성 및 설정
         // 앞서 모든 데코레이터를 제거했기 때문에 기본 데코레이터 추가한다
         view.calendarView.addDecorators(
-                *diaryModels.map { DiaryDecorator(it) }.toTypedArray(),
-                sundayDecorator,
-                saturdayDecorator,
-                oneDayDecorator
+            *diaryModels.map { DiaryDecorator(it) }.toTypedArray(),
+            sundayDecorator,
+            saturdayDecorator,
+            oneDayDecorator
         )
     }
 
     /**
      * 유저가 캘린더에서 날짜를 선택했을 경우
      */
-    override fun onDateSelected(widget: MaterialCalendarView, date: CalendarDay, selected: Boolean) {
+    override fun onDateSelected(
+        widget: MaterialCalendarView,
+        date: CalendarDay,
+        selected: Boolean
+    ) {
         // 캘린더 상태일때
         if (selected) {
             widget.clearSelection()
@@ -159,10 +173,10 @@ class CalendarFragment : Fragment(), LifecycleObserver, OnDateSelectedListener {
 
             // 인텐트 생성
             val intent = Intent(activity, AddCalendarActivity::class.java)
-                    .putExtra("babyId", babyModel.baby.id)
-                    .putExtra("year", date.year)
-                    .putExtra("month", date.month)
-                    .putExtra("day", date.day)
+                .putExtra("babyId", babyModel.baby.id)
+                .putExtra("year", date.year)
+                .putExtra("month", date.month)
+                .putExtra("day", date.day)
             activity.startActivity(intent)
         }
     }
