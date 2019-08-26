@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
@@ -21,7 +22,8 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_checklist.*
 
-class CheckListActivity : AppCompatActivity(), LifecycleObserver, CheckListSection.OnItemChangeListener {
+class CheckListActivity : AppCompatActivity(), LifecycleObserver,
+    CheckListSection.OnItemChangeListener, CheckListSection.OnItemLongClickListener {
 
     // 아이 정보
     private val babyId: Long
@@ -86,15 +88,21 @@ class CheckListActivity : AppCompatActivity(), LifecycleObserver, CheckListSecti
 
         // 어뎁터 생성
         checkListCategorySpinner.adapter = checkListCategoryAdapter
-        checkListCategorySpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-            }
+        checkListCategorySpinner.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+                override fun onNothingSelected(parent: AdapterView<*>?) {
+                }
 
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                // 카테고리 필터 설정
-                categoryFilter = if (position == 0) null else categories[position - 1]
+                override fun onItemSelected(
+                    parent: AdapterView<*>?,
+                    view: View?,
+                    position: Int,
+                    id: Long
+                ) {
+                    // 카테고리 필터 설정
+                    categoryFilter = if (position == 0) null else categories[position - 1]
+                }
             }
-        }
 
         // 카테고리 요청후 설정
         db.checkListCategoryDao().getAll()
@@ -154,13 +162,28 @@ class CheckListActivity : AppCompatActivity(), LifecycleObserver, CheckListSecti
 
         // 데이터 설정
         categories.filter { categoryFilter == null || it.id == categoryFilter?.id }.forEach {
-            val checkLists = items.filter { checkListCategory -> checkListCategory.categoryId == it.id }
+            val checkLists =
+                items.filter { checkListCategory -> checkListCategory.categoryId == it.id }
             if (checkLists.count() > 0) {
-                checkListAdapter.addSection(CheckListSection(it.name, checkLists, this))
+                checkListAdapter.addSection(CheckListSection(it.name, checkLists, this, this))
             }
         }
 
         checkListAdapter.notifyDataSetChanged()
+    }
+
+    /**
+     * 체크 리스트 삭제
+     */
+    private fun deleteCheckList(checkList: CheckList) {
+        db.checkListDao().deleteAll(listOf(checkList))
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                { Log.d("CheckListactivity", "Delete Complete") },
+                { it.printStackTrace() }
+            )
+            .apply { compositeDisposable.add(this) }
     }
 
     /**
@@ -176,5 +199,21 @@ class CheckListActivity : AppCompatActivity(), LifecycleObserver, CheckListSecti
                 { it.printStackTrace() }
             )
             .apply { compositeDisposable.add(this) }
+    }
+
+    /**
+     * 체크리스트 롱 클릭 리스너
+     */
+    override fun onLongClickCheckList(checkList: CheckList): Boolean {
+        AlertDialog.Builder(this)
+            .setMessage("체크리스트를 삭제하시겠습니까?")
+            .setCancelable(false)
+            .setPositiveButton(android.R.string.ok) { dialog, which -> deleteCheckList(checkList) }
+            .setNegativeButton(android.R.string.cancel) { dialog, which ->
+                dialog.dismiss()
+            }
+            .show()
+
+        return true
     }
 }

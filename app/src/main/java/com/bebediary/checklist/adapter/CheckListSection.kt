@@ -10,7 +10,8 @@ import io.github.luizgrp.sectionedrecyclerviewadapter.StatelessSection
 class CheckListSection(
     private val title: String,
     private val items: List<CheckList>,
-    private val onItemChangeListener: OnItemChangeListener? = null
+    private val onItemChangeListener: OnItemChangeListener? = null,
+    private val onItemLongClickListener: OnItemLongClickListener? = null
 ) : StatelessSection(
     SectionParameters.builder()
         .itemResourceId(R.layout.check_list_item)
@@ -33,11 +34,14 @@ class CheckListSection(
     }
 
     override fun getItemViewHolder(view: View): RecyclerView.ViewHolder {
-        return CheckListItemViewHolder(view, onItemChangeListener)
+        return CheckListItemViewHolder(view, onItemChangeListener, onItemLongClickListener)
     }
 
     interface OnItemChangeListener {
         fun onChangeCheckListComplete(checkList: CheckList, isComplete: Boolean)
     }
 
+    interface OnItemLongClickListener {
+        fun onLongClickCheckList(checkList: CheckList): Boolean
+    }
 }
