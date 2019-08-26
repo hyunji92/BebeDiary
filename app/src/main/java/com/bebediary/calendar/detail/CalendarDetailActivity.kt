@@ -1,5 +1,6 @@
 package com.bebediary.calendar.detail
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
@@ -10,6 +11,7 @@ import androidx.lifecycle.OnLifecycleEvent
 import com.bebediary.GlideApp
 import com.bebediary.MyApplication
 import com.bebediary.R
+import com.bebediary.calendar.AddCalendarActivity
 import com.bebediary.calendar.detail.adapter.CalendarDetailAttachmentAdapter
 import com.bebediary.database.model.DiaryModel
 import com.bebediary.util.extension.eventDateToText
@@ -18,6 +20,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_calendar_detail.*
+import java.util.*
 
 class CalendarDetailActivity : AppCompatActivity(), LifecycleObserver {
 
@@ -36,6 +39,9 @@ class CalendarDetailActivity : AppCompatActivity(), LifecycleObserver {
 
     // Adapter
     private val calendarDetailAttachmentAdapter by lazy { CalendarDetailAttachmentAdapter() }
+
+    // Diary
+    private var diaryModel: DiaryModel? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,6 +66,9 @@ class CalendarDetailActivity : AppCompatActivity(), LifecycleObserver {
         }
 
         calendarDetailImageRecyclerView.adapter = calendarDetailAttachmentAdapter
+
+        // 다이어리 수정 버튼
+        calendarDetailEditButton.setOnClickListener { editDiary() }
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
@@ -68,7 +77,10 @@ class CalendarDetailActivity : AppCompatActivity(), LifecycleObserver {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
-                { invalidateDiaryView(it) },
+                {
+                    this.diaryModel = it
+                    invalidateDiaryView(it)
+                },
                 { it.printStackTrace() }
             )
             .apply { compositeDisposable.add(this) }
@@ -112,6 +124,21 @@ class CalendarDetailActivity : AppCompatActivity(), LifecycleObserver {
             calendarDetailAttachmentAdapter.items = recyclerViewAttachments
             calendarDetailAttachmentAdapter.notifyDataSetChanged()
         }
+    }
+
+    /**
+     * 다이어리 수정 화면 실행
+     */
+    private fun editDiary() {
+        val diaryModel = diaryModel ?: return
+        val diaryDate = Calendar.getInstance().apply { time = diaryModel.diary.date }
+
+        val intent = Intent(this, AddCalendarActivity::class.java)
+            .putExtra("babyId", diaryModel.babies.first().id)
+            .putExtra("year", diaryDate.get(Calendar.YEAR))
+            .putExtra("month", diaryDate.get(Calendar.MONTH))
+            .putExtra("day", diaryDate.get(Calendar.DAY_OF_MONTH))
+        startActivity(intent)
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
