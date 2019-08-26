@@ -22,6 +22,7 @@ import com.bebediary.database.entity.Attachment
 import com.bebediary.database.entity.Baby
 import com.bebediary.database.entity.CheckList
 import com.bebediary.database.entity.Sex
+import com.bebediary.database.model.BabyModel
 import com.bebediary.util.Constants
 import com.bebediary.util.extension.format
 import com.bebediary.util.extension.toAttachment
@@ -75,8 +76,16 @@ class BabyRegisterActivity : Activity() {
     // Database
     private val db by lazy { (application as MyApplication).db }
 
+    // 아이 정보
+    private val babyId: Long
+        get() = intent.getLongExtra("babyId", -1L)
+
     // 수정 모드 여부
-    private var isEdit = false
+    private val isEdit: Boolean
+        get() = babyId != -1L
+
+    // 기존 아이 정보
+    private var preBabyModel: BabyModel? = null
 
     // 기본 체크 리스트
     // CategoryID  = .database.callback.CheckListInitializer 확인
@@ -116,6 +125,9 @@ class BabyRegisterActivity : Activity() {
         requestWindowFeature(Window.FEATURE_NO_TITLE)
         setContentView(R.layout.activity_baby_register)
 
+        // 수정 모드일때 기초 데이터 설정
+        fetchEditBaby()
+
         // 사진 접근 권한
         tedPermission()
 
@@ -132,14 +144,8 @@ class BabyRegisterActivity : Activity() {
         pregnant_on_off.setOnClickListener { isPregnant = !isPregnant }
 
         // 이미지 등록 버튼
-        empty_baby_image_register.setOnClickListener {
-            // 권한 허용에 동의하지 않았을 경우 토스트를 띄웁니다.
-            if (hasPhotoPermission) {
-                showPickPhotoDialog()
-            } else {
-                Toast.makeText(it.context, resources.getString(R.string.permission_2), Toast.LENGTH_LONG).show()
-            }
-        }
+        baby_image.setOnClickListener { openPhotoDialog() }
+        empty_baby_image_register.setOnClickListener { openPhotoDialog() }
 
         updateLayout()
     }
@@ -156,6 +162,22 @@ class BabyRegisterActivity : Activity() {
     }
 
     /**
+     * 상황에 맞게 사진 선택 다이얼로그 또는 퍼미션 설정 다이얼로그 띄움
+     */
+    private fun openPhotoDialog() {
+        // 권한 허용에 동의하지 않았을 경우 토스트를 띄웁니다.
+        if (hasPhotoPermission) {
+            showPickPhotoDialog()
+        } else {
+            Toast.makeText(
+                this,
+                resources.getString(R.string.permission_2),
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
+    /**
      * 사진 선택 다이얼로그
      */
     private fun showPickPhotoDialog() {
@@ -165,6 +187,47 @@ class BabyRegisterActivity : Activity() {
                 if (id == 0) takePhoto() else goToAlbum()
             }
             .show()
+    }
+
+    /**
+     * 아이 수정 일때 데이터 요청
+     */
+    private fun fetchEditBaby() {
+        if (!isEdit) return
+        db.babyDao().getById(babyId)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                {
+                    // 기존 아이 정보 저장
+                    preBabyModel = it
+
+                    // 이름
+                    baby_name.setText(it.baby.name)
+
+                    // 성별
+                    babyRegisterMale.isChecked = it.baby.sex == Sex.Male
+                    babyRegisterFemale.isChecked = it.baby.sex == Sex.Female
+
+                    // 임신
+                    isPregnant = it.baby.isPregnant
+
+                    // Event Date
+                    val eventCalendar = if (it.baby.isPregnant) {
+                        Calendar.getInstance().apply { time = it.baby.babyDueDate }
+                    } else {
+                        Calendar.getInstance().apply { time = it.baby.birthday }
+                    }
+                    year = eventCalendar.get(Calendar.YEAR)
+                    month = eventCalendar.get(Calendar.MONTH)
+                    day = eventCalendar.get(Calendar.DAY_OF_MONTH)
+
+                    // 썸네일
+                    invalidatePhotoView(it.photos.first())
+                },
+                { it.printStackTrace() }
+            )
+            .apply { compositeDisposable.add(this) }
     }
 
     /**
@@ -290,7 +353,7 @@ class BabyRegisterActivity : Activity() {
         }
 
         // 성별 선택 여부 확인
-        if (!babyRegisterMale.isChecked && !babyRegisterFeMale.isChecked) {
+        if (!babyRegisterMale.isChecked && !babyRegisterFemale.isChecked) {
             Toast.makeText(this, "성별을 선택해주세요", Toast.LENGTH_SHORT).show()
             return
         }
@@ -308,6 +371,42 @@ class BabyRegisterActivity : Activity() {
             return
         }
 
+        if (isEdit) edit() else save()
+    }
+
+    private fun edit() {
+        val babyModel = preBabyModel ?: return
+        if (preBabyModel == null) {
+            Toast.makeText(this, "아이 정보가 로드되지 않았습니다", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // 아이 정보 생성
+        val baby = Baby(
+            id = babyModel.baby.id,
+            name = baby_name.text.toString(),
+            sex = if (babyRegisterMale.isChecked) Sex.Male else Sex.Female,
+            photoId = photo?.id ?: throw IllegalStateException("사진 아이디가 존재하지 않습니다"),
+            isPregnant = isPregnant,
+            birthday = if (isPregnant) null else eventCalendar.time,
+            babyDueDate = if (isPregnant) eventCalendar.time else null,
+            isSelected = babyModel.baby.isSelected
+        )
+
+        // 데이터 입력
+        db.babyDao().update(baby)
+            .subscribeOn(Schedulers.io())
+            .subscribe(
+                { finish() },
+                {
+                    Toast.makeText(this, "아이 데이터 업데이트에 실패하였습니다", Toast.LENGTH_SHORT).show()
+                    it.printStackTrace()
+                }
+            )
+            .apply { compositeDisposable.add(this) }
+    }
+
+    private fun save() {
         // 아이 정보 생성
         val baby = Baby(
             name = baby_name.text.toString(),
@@ -357,13 +456,17 @@ class BabyRegisterActivity : Activity() {
 
         // 다이얼로그 보여줌
         DatePickerDialog(
-            context, { _, year, month, day ->
+            context,
+            { _, year, month, day ->
 
                 // 이벤트 정보 업데이트
                 this.year = year
                 this.month = month
                 this.day = day
-            }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
         ).show()
     }
 }

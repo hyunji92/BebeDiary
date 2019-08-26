@@ -411,6 +411,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         // 이름 설정
         navigationHeaderName.text = babyModel.baby.name
+
+        // 헤더뷰 클릭 리스너 설정
+        headerView.setOnClickListener { editBaby(babyModel) }
     }
 
     /**
@@ -590,6 +593,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
             .setNegativeButton(android.R.string.cancel) { dialog, _ -> dialog.dismiss() }
             .show()
+    }
+
+    /**
+     * 아이 수정 화면 실행
+     */
+    private fun editBaby(babyModel: BabyModel) {
+        val intent = Intent(this, BabyRegisterActivity::class.java)
+        intent.putExtra("babyId", babyModel.baby.id)
+        startActivity(intent)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
