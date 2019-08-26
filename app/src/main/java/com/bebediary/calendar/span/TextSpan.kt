@@ -6,8 +6,10 @@ import android.graphics.Rect
 import android.text.style.LineBackgroundSpan
 import kotlin.math.min
 
-
-class TextSpan(private var text: String) : LineBackgroundSpan {
+class TextSpan(
+    private var text: String,
+    private var color: Int = 0xff959595.toInt()
+) : LineBackgroundSpan {
 
     private val textRect by lazy { Rect() }
 
@@ -17,10 +19,12 @@ class TextSpan(private var text: String) : LineBackgroundSpan {
     // Horizontal 패딩
     private val widthPadding = 16
 
-    override fun drawBackground(c: Canvas, p: Paint,
-                                left: Int, right: Int, top: Int, baseline: Int, bottom: Int,
-                                charSequence: CharSequence,
-                                start: Int, end: Int, lnum: Int) {
+    override fun drawBackground(
+        c: Canvas, p: Paint,
+        left: Int, right: Int, top: Int, baseline: Int, bottom: Int,
+        charSequence: CharSequence,
+        start: Int, end: Int, lnum: Int
+    ) {
 
         // 원래 텍스트 사이즈 저장
         val originalTextSize = p.textSize
@@ -73,7 +77,7 @@ class TextSpan(private var text: String) : LineBackgroundSpan {
         }
 
         // 색상 검정색으로 설정
-        p.color = 0xff959595.toInt()
+        p.color = color
 
         // 글씨 작성
         textLines.forEachIndexed { index, text ->
@@ -82,7 +86,8 @@ class TextSpan(private var text: String) : LineBackgroundSpan {
             p.getTextBounds(text, 0, text.length, textRect)
 
             // 글씨가 적히는 위치
-            val x = (right - left - widthPadding) / 2f - (textRect.width() / 2f) + (widthPadding / 2f)
+            val x =
+                (right - left - widthPadding) / 2f - (textRect.width() / 2f) + (widthPadding / 2f)
             val y = ((bottom - top) / 2f) + ((bottom - top)) + textRect.height() * index
 
             // 글씨 작성

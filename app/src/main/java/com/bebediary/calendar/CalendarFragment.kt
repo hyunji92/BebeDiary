@@ -11,25 +11,23 @@ import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import com.bebediary.MyApplication
 import com.bebediary.R
-import com.bebediary.calendar.decorator.DiaryDecorator
-import com.bebediary.calendar.decorator.OneDayDecorator
-import com.bebediary.calendar.decorator.SaturdayDecorator
-import com.bebediary.calendar.decorator.SundayDecorator
+import com.bebediary.calendar.decorator.*
 import com.bebediary.calendar.detail.CalendarDetailActivity
 import com.bebediary.calendar.list.CalendarListActivity
 import com.bebediary.database.model.BabyModel
 import com.bebediary.database.model.DiaryModel
-import com.prolificinteractive.materialcalendarview.CalendarDay
-import com.prolificinteractive.materialcalendarview.CalendarMode
-import com.prolificinteractive.materialcalendarview.MaterialCalendarView
-import com.prolificinteractive.materialcalendarview.OnDateSelectedListener
+import com.bebediary.util.extension.isSaturday
+import com.prolificinteractive.materialcalendarview.*
+import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.fragment_calendar.view.*
 import java.util.*
 
-class CalendarFragment : Fragment(), LifecycleObserver, OnDateSelectedListener {
+
+class CalendarFragment : Fragment(), LifecycleObserver, OnDateSelectedListener,
+    OnMonthChangedListener {
 
     // Calendar Decorators
     private val saturdayDecorator by lazy { SaturdayDecorator(requireContext()) }
@@ -47,6 +45,9 @@ class CalendarFragment : Fragment(), LifecycleObserver, OnDateSelectedListener {
 
     // 다이어리 모델 리스트 저장
     private var diaryModels: List<DiaryModel> = listOf()
+
+    // 아이 이벤트 데코레이터
+    private var babyEventDecorators = arrayListOf<BabyEventDecorator>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -91,6 +92,9 @@ class CalendarFragment : Fragment(), LifecycleObserver, OnDateSelectedListener {
 
         // 캘린더 날짜를 선택했을때
         view.calendarView.setOnDateChangedListener(this)
+
+        // 월 변경 리스너
+        view.calendarView.setOnMonthChangedListener(this)
     }
 
     /**
@@ -154,6 +158,78 @@ class CalendarFragment : Fragment(), LifecycleObserver, OnDateSelectedListener {
             saturdayDecorator,
             oneDayDecorator
         )
+
+        // 달 변경 이벤트 생성
+        onMonthChanged(view.calendarView, view.calendarView.currentDate)
+    }
+
+    /**
+     * 캘린더 월이 변경 되었을 경우
+     */
+    override fun onMonthChanged(widget: MaterialCalendarView, date: CalendarDay) {
+
+        // 데코레이터 제거
+        babyEventDecorators.forEach { widget.removeDecorator(it) }
+        babyEventDecorators.clear()
+
+        val currentBabyModel = currentBabyModel ?: return
+
+        // 데이터 업데이트 비동기처리
+        Observable.fromCallable {
+            // 이번달의 시작 날짜부터 끝 날짜 까지 반복해서
+            val startOfMonth = Calendar.getInstance().apply {
+                set(date.year, date.month, 1, 0, 0, 0)
+                set(Calendar.MILLISECOND, 0)
+            }
+
+            // 기본 날짜 설정
+            val searchDate = Calendar.getInstance().apply {
+                timeInMillis = startOfMonth.timeInMillis
+            }
+
+            for (dayOfMonth in 1..startOfMonth.getActualMaximum(Calendar.DAY_OF_MONTH)) {
+
+                // 날짜 설정
+                searchDate.set(Calendar.DAY_OF_MONTH, dayOfMonth)
+
+                // 토요일 아니면 Continue
+                if (!searchDate.time.isSaturday()) continue
+
+                // 해당 토요일에 아무 일정이 없을 경우 아기 이벤트 정보 추가
+                val hasAlreadyEvent = diaryModels
+                    .filter { it.diary.date.time >= searchDate.timeInMillis }
+                    .findLast {
+                        val diaryDate =
+                            Calendar.getInstance().apply { timeInMillis = it.diary.date.time }
+                        diaryDate.get(Calendar.YEAR) == searchDate.get(Calendar.YEAR) &&
+                                diaryDate.get(Calendar.MONTH) == searchDate.get(Calendar.MONTH) &&
+                                diaryDate.get(Calendar.DAY_OF_MONTH) == searchDate.get(Calendar.DAY_OF_MONTH)
+                    }
+                if (hasAlreadyEvent != null) continue
+
+                // Decorator 추가
+                babyEventDecorators.add(
+                    BabyEventDecorator(
+                        requireContext(),
+                        babyModel = currentBabyModel,
+                        from = Calendar.getInstance().apply {
+                            set(
+                                searchDate.get(Calendar.YEAR),
+                                searchDate.get(Calendar.MONTH),
+                                searchDate.get(Calendar.DAY_OF_MONTH)
+                            )
+                        }
+                    )
+                )
+            }
+        }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                { widget.addDecorators(babyEventDecorators) },
+                { it.printStackTrace() }
+            )
+            .apply { compositeDisposable.add(this) }
     }
 
     /**
